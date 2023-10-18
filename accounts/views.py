@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from .serializer import MyuserPhoneSerializer,OtpSerializer,TokenSerializer
+from .serializers import MyuserPhoneSerializer,OtpSerializer,TokenSerializer,GoogleAuthSerializer
 from .utils import send_sms,verify_user_code
 from rest_framework.response import Response
 from rest_framework import status
 from .models import MyUser
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.generics import GenericAPIView
 
 
 
@@ -21,6 +22,14 @@ def get_tokens_for_user(user):
 
 
 
+class GoogleAuth(GenericAPIView):
+    serializer_class = GoogleAuthSerializer
+    def post(self,request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception = True )
+        data = ((serializer.validated_data)['auth_token'])
+        return Response(data,status=status.HTTP_200_OK)
+
 
 
 class RegistrationClass(APIView):
@@ -35,7 +44,7 @@ class RegistrationClass(APIView):
                 request.session['phone']=phone_no
                 return Response({'data':serilaizer.data,'msg':'Otp sent successfully...'},status=status.HTTP_200_OK)
             except Exception as e:
-                return Response({'msg':'Cant sent otp...'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({'msg':'Cant sent otp, Please try after sometimes...'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serilaizer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class OtpVerification(APIView):

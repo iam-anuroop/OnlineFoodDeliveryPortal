@@ -2,11 +2,11 @@
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 # from django.contrib.auth import authenticate
-from .serializers import UserSerilaizer,UserProfileSerializer
+from .serializers import UserSerilaizer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from accounts.models import MyUser
+from accounts.models import MyUser,UserProfile
 
 
 
@@ -22,15 +22,25 @@ class ProfileManage(APIView):
         return Response({'data':serializer.data},status=status.HTTP_200_OK)
         # return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
-    
     def patch(self, request):
         user = request.user
-        serializer = UserSerilaizer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'data': serializer.data}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        try:
+            profile = UserProfile.objects.get(user=user)
+            if profile:
+                serializer = UserSerilaizer(user, data=request.data, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            UserProfile.objects.create(user=user)
+            serializer = UserSerilaizer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
     def delete(self,request):
         user = request.user
         user.delete()
