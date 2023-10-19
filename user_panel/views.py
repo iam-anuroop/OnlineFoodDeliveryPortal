@@ -7,8 +7,30 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from accounts.models import MyUser,UserProfile
+from ipware import get_client_ip
+import json, urllib
+from decouple import config
 
 
+
+
+class UserCurrentLocation(APIView):
+    def post(self,request):
+        client_ip, is_routable = get_client_ip(request)
+        # if client_ip is None:
+        #     client_ip='0.0.0.0'
+        if is_routable:
+            ip_type = 'public'
+        else:
+            ip_type = 'private'
+        ip_address = "218.53.14.236"
+        auth = config('FIND_IP_AUTH')
+        url = "https://api.ipfind.com/?auth="+auth+"&ip="+ip_address
+        resp = urllib.request.urlopen(url)
+        data1 = json.loads(resp.read())
+        data1['client_ip'] = client_ip
+        data1['ip_type'] = ip_type
+        return Response(data1)
 
 
 
@@ -17,10 +39,8 @@ class ProfileManage(APIView):
     def get(self,request):
         currentuser = request.user
         user = MyUser.objects.get(id=currentuser.id)
-        # user = request.user
         serializer = UserSerilaizer(user)
         return Response({'data':serializer.data},status=status.HTTP_200_OK)
-        # return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
     def patch(self, request):
         user = request.user
@@ -45,5 +65,5 @@ class ProfileManage(APIView):
         user = request.user
         user.delete()
         return Response({'msg':'Account deleted...'},status=status.HTTP_200_OK)
-    
+
 # Create your views here.

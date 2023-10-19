@@ -15,7 +15,6 @@ def register_social_user(provider, user_id, email, name):
             register_user = authenticate(
                 email=email, password= config('GOOGLE_CLIENT_SECRET')
             )
-            print(register_user)
             
             return {
                 'username':register_user.username,
@@ -29,6 +28,7 @@ def register_social_user(provider, user_id, email, name):
     else:
         user = {
             'email':email,
+            'username':name,
             'password':config('GOOGLE_CLIENT_SECRET')
         }
         user = MyUser.objects.create_user(**user)

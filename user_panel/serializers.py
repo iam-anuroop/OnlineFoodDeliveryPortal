@@ -8,7 +8,7 @@ class UserProfileSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = UserProfile
         geo_field = 'location'
-        fields = '__all__'
+        fields = '__all__' #describe
 
 
 

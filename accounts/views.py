@@ -37,7 +37,6 @@ class RegistrationClass(APIView):
         serilaizer = MyuserPhoneSerializer(data=request.data)
         if serilaizer.is_valid():
             phone_no = serilaizer.validated_data.get('phone')
-            # serilaizer.save()
             try:
                 hashed_otp=send_sms(phone_no)
                 request.session['hashed_otp']=hashed_otp
@@ -47,10 +46,10 @@ class RegistrationClass(APIView):
                 return Response({'msg':'Cant sent otp, Please try after sometimes...'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serilaizer.errors,status=status.HTTP_400_BAD_REQUEST)
 
+
+
 class OtpVerification(APIView):
     def post(self,request):
-        print(request)
-        print(request.data)
         serilaizer = OtpSerializer(data=request.data)
         if serilaizer.is_valid():
             otp = serilaizer.validated_data.get('otp')
@@ -65,6 +64,8 @@ class OtpVerification(APIView):
                     if user is not None:
                         token = get_tokens_for_user(user)
                         return Response({'msg':'Success...','token':token},status=status.HTTP_200_OK)
+                elif verify_status == 'rejected':
+                    return Response({'msg':'Wrong otp...'},status=status.HTTP_400_BAD_REQUEST)
                 return Response({'msg':'Something went wrong...'},status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 print(e)
@@ -72,24 +73,6 @@ class OtpVerification(APIView):
         return Response(serilaizer.errors,status=status.HTTP_400_BAD_REQUEST)
     
                 
-
-
-
-    
-
-            
-        
-            
-
-
-
-
-
-        
-
-
-
-
 
 
 # Create your views here.
