@@ -1,9 +1,8 @@
 from rest_framework.exceptions import AuthenticationFailed
-import random
+# import random
 from .models import MyUser
-from decouple import config
 from . import views
-from django.contrib.auth import authenticate
+# from django.contrib.auth import authenticate
 
 
 def register_social_user(provider, user_id, email, name):
@@ -12,34 +11,28 @@ def register_social_user(provider, user_id, email, name):
     if filtered_user_by_email.exists():
 
         if provider == filtered_user_by_email[0].auth_provider:
-            register_user = authenticate(
-                email=email, password= config('GOOGLE_CLIENT_SECRET')
-            )
-            
+            user = MyUser.objects.get(email=email)
             return {
-                'username':register_user.username,
-                'email':register_user.email,
-                'tokens':views.get_tokens_for_user(register_user)
+                'username':user.username,
+                'email':user.email,
+                'tokens':views.get_tokens_for_user(user)
             }
         else:
+            # in here they must enter their otp
             raise AuthenticationFailed(
-                detail="Please Continue your login using "+filtered_user_by_email[0].auth_provider
+                detail="Please Continue using otp."
             )
     else:
         user = {
             'email':email,
             'username':name,
-            'password':config('GOOGLE_CLIENT_SECRET')
         }
         user = MyUser.objects.create_user(**user)
         user.auth_provider = 'google'
         user.is_active =True
         user.save()
-        new_user = authenticate(
-            email=email, password=config('GOOGLE_CLIENT_SECRET')
-        )
         return{
-            'email':new_user.email,
-            'username':new_user.username,
-            'tokens':views.get_tokens_for_user(new_user)
+            'email':user.email,
+            'username':user.username,
+            'tokens':views.get_tokens_for_user(user)
         }

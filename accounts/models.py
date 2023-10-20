@@ -3,7 +3,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 
 class MyUserManager(BaseUserManager):
-    def create_user(self,phone=None,email=None,username=None,password=None,auth_provider='phone', **kwargs):
+    def create_user(self,phone=None,email=None,username=None,auth_provider='phone', **kwargs):
         # if not phone:
         #     raise ValueError("Users must have an phone")
 
@@ -13,15 +13,14 @@ class MyUserManager(BaseUserManager):
             email=email,
             auth_provider=auth_provider
         )
-        user.set_password(password)
+        # user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, phone=None,username=None,password=None,**kwargs):
+    def create_superuser(self, phone=None,username=None,**kwargs):
         user = self.create_user(
             phone=phone,
             username=username,
-            password=password            
         )
         user.is_admin = True
         user.is_active = True
@@ -33,7 +32,6 @@ class MyUser(AbstractBaseUser):
     username = models.CharField(max_length=255,null=True,blank=True)
     phone = models.CharField(
         max_length=20,
-        unique=True,
         null=True,
     )
     email = models.EmailField(max_length=255,unique=True,null=True,blank=True)
