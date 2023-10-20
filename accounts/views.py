@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from .serializers import MyuserPhoneSerializer,OtpSerializer,TokenSerializer,GoogleAuthSerializer
-from .utils import send_sms,verify_user_code
+from .serializers import MyuserEmailSerializer,OtpSerializer,TokenSerializer,GoogleAuthSerializer
+from .utils import send_email,verify_user_code
 from rest_framework.response import Response
 from rest_framework import status
 from .models import MyUser
@@ -34,13 +34,14 @@ class GoogleAuth(GenericAPIView):
 
 class RegistrationClass(APIView):
     def post(self,request):
-        serilaizer = MyuserPhoneSerializer(data=request.data)
+        serilaizer = MyuserEmailSerializer(data=request.data)
         if serilaizer.is_valid():
-            phone_no = serilaizer.validated_data.get('phone')
+            email = serilaizer.validated_data.get('phone')
+            print(email)
             try:
-                hashed_otp=send_sms(phone_no)
+                hashed_otp=send_email(email)
                 request.session['hashed_otp']=hashed_otp
-                request.session['phone']=phone_no
+                request.session['email']=email
                 return Response({'data':serilaizer.data,'msg':'Otp sent successfully...'},status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({'msg':'Cant sent otp, Please try after sometimes...'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -54,11 +55,11 @@ class OtpVerification(APIView):
         if serilaizer.is_valid():
             otp = serilaizer.validated_data.get('otp')
             hashed_otp = request.session.get('hashed_otp')
-            phone = request.session.get('phone')
+            email = request.session.get('email')
             try:
                 verify_status = verify_user_code(hashed_otp,otp)
                 if verify_status == 'approved':
-                    user = MyUser.objects.create_user(phone=phone)
+                    user = MyUser.objects.create_user(email=email)
                     user.is_active=True
                     user.save()
                     if user is not None:
