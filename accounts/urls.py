@@ -1,8 +1,11 @@
 from django.urls import path
-from .views import RegistrationClass,OtpVerification,GoogleAuth
+from .views import VerifyMobileNumber,GoogleAuth,VerifyPhoneOtp,RegisterWithEmail,LoginWithOtp
 
 urlpatterns = [
-    path('registration/',RegistrationClass.as_view(),name='registration'),
-    path('login/',OtpVerification.as_view(),name='login'),
-    path('auth/',GoogleAuth.as_view(),name='auth')
+    path('auth/',GoogleAuth.as_view(),name='auth'),
+    path('register/',RegisterWithEmail.as_view(),name='register'),
+    path('login/',LoginWithOtp.as_view(),name='login'),
+    path('otpphone/',VerifyMobileNumber.as_view(),name='otpphone'),
+    path('phoneverify/',VerifyPhoneOtp.as_view(),name='phoneverify'),
+
 ]

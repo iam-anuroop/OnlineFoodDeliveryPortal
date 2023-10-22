@@ -46,10 +46,12 @@ class GoogleAuthSerializer(serializers.Serializer):
 
 
 
-class MyuserEmailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MyUser
-        fields = ['phone']
+class MyuserEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class MyuserPhoneSerializer(serializers.Serializer):
+    phone = serializers.CharField()
 
 
 class OtpSerializer(serializers.Serializer):

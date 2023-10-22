@@ -17,13 +17,14 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, phone=None,username=None,**kwargs):
+    def create_superuser(self, email=None,password=None,username=None,**kwargs):
         user = self.create_user(
-            phone=phone,
+            email=email,
             username=username,
         )
         user.is_admin = True
         user.is_active = True
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
