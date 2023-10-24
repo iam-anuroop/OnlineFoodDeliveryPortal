@@ -38,7 +38,7 @@ def verify_user_code(verification_sid, user_input):
     
 
 
-def send_email(user=None,email=None,otp=None,subject=None):
+def send_email(user=None,email=None,message=None,otp=None,subject=None):
     mail_subject = subject
     message = render_to_string("email_otp.html", {
         'user': user,

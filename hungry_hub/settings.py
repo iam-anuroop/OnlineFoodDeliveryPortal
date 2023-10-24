@@ -47,6 +47,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_gis',
     'accounts',
+    'user_panel',
+    'hotel_panel',
+    'admin_panel',
 ]
 
 MIDDLEWARE = [

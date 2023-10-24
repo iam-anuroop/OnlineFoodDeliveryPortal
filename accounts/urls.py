@@ -7,5 +7,4 @@ urlpatterns = [
     path('login/',LoginWithOtp.as_view(),name='login'),
     path('otpphone/',VerifyMobileNumber.as_view(),name='otpphone'),
     path('phoneverify/',VerifyPhoneOtp.as_view(),name='phoneverify'),
-
 ]

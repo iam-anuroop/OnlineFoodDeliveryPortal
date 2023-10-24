@@ -8,12 +8,14 @@ from .models import MyUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.generics import GenericAPIView
 import random
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
-
+    
     access_token = TokenSerializer.get_token(user)
 
     return {
@@ -32,6 +34,7 @@ class GoogleAuth(GenericAPIView):
         return Response(data,status=status.HTTP_200_OK)
 
 
+
 class RegisterWithEmail(APIView):
     def post(self,request):
         serializer = MyuserEmailSerializer(data=request.data)
@@ -45,6 +48,7 @@ class RegisterWithEmail(APIView):
             request.session['login_email'] = email
             return Response({'msg':'OTP send to your mail...'},status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
 
 class LoginWithOtp(APIView):
     def post(self,request):
@@ -60,6 +64,8 @@ class LoginWithOtp(APIView):
                     return Response({'token':token},status=status.HTTP_200_OK)
                 except:
                     user = MyUser.objects.create_user(email=login_email)
+                    user.is_active = True
+                    user.save()
                     token = get_tokens_for_user(user)
                     return Response({'token':token},status=status.HTTP_200_OK)
             else:
@@ -69,7 +75,7 @@ class LoginWithOtp(APIView):
 
 
 
-
+@permission_classes([IsAuthenticated])
 class VerifyMobileNumber(APIView):
     def post(self,request):
         print(request.data)
@@ -84,6 +90,8 @@ class VerifyMobileNumber(APIView):
             except Exception as e:
                 return Response({'msg':'Cant sent otp, Please try after sometimes...'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serilaizer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class VerifyPhoneOtp(APIView):
