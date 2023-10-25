@@ -20,12 +20,13 @@ class HotelsAccount(models.Model):
     contact = models.CharField(max_length=100)
     alt_contact = models.CharField(max_length=100)
     certificate = models.CharField()
-    email = models.EmailField()
-    password = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
     address = models.TextField()
     location = models.PointField(srid=4326)
     rating = models.FloatField()
 
+    is_active = models.BooleanField(default=False)
+    is_logined = models.BooleanField(default=True)
     is_approved = models.BooleanField(default=False)
 
 
