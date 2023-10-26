@@ -43,6 +43,7 @@ def send_email(user=None,email=None,message=None,otp=None,subject=None):
     message = render_to_string("email_otp.html", {
         'user': user,
         'otp':otp,
+        'message':message
     })
     to_email = email
     send_mail = EmailMessage(mail_subject, message, to=[to_email])

@@ -41,9 +41,9 @@ class RegisterWithEmail(APIView):
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
             otp=random.randint(100000,999999)
-            print(otp)
             subject = "OTP for login."
-            send_email(email=email,otp=otp,subject=subject)
+            message = f"മോനെ ഇതാണ് നിന്റെ otp = {otp}"
+            send_email(email=email,message=message,subject=subject)
             request.session['login_otp'] = otp
             request.session['login_email'] = email
             return Response({'msg':'OTP send to your mail...'},status=status.HTTP_200_OK)

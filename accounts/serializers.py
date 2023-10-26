@@ -13,8 +13,8 @@ class TokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        if user.phone:
-            token['phone'] = user.phone
+        if user.email:
+            token['email'] = user.email
         return token
 
 

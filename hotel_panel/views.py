@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from .serializer import OwnerSerializer,HotelAccountSeriallizer
+from .serializer import OwnerSerializer,HotelAccountSeriallizer,EmailSeriaizer
 from accounts.utils import send_email,send_phone,verify_user_code
 from .models import HotelOwner,HotelsAccount
 from rest_framework.response import Response
@@ -10,6 +10,7 @@ from rest_framework import status
 from accounts.models import MyUser
 from accounts.serializers import OtpSerializer
 import random
+from .customauth import AuthenticateHotel
 
 
 
@@ -38,12 +39,12 @@ class OwnerAccountView(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
 
-    def patch(self,request):
-        serializer = OwnerSerializer(HotelOwner,data=request.data,partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    # def patch(self,request):
+    #     serializer = OwnerSerializer(HotelOwner,data=request.data,partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data,status=status.HTTP_200_OK)
+    #     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -53,61 +54,46 @@ class OwnerAccountView(APIView):
 @permission_classes([IsAuthenticated])
 class HotelAccountRegister(APIView):
     def post(self,request):
-        try:
-            serializer = HotelAccountSeriallizer(data=request.data)
-            if serializer.is_valid():
-                email = serializer.validated_data.get('email'),
-                phone = serializer.validated_data.get('contact'),
+        serializer = HotelAccountSeriallizer(data=request.data)
+        if serializer.is_valid():
+            try:
+                owner = HotelOwner.objects.get(user=request.user)
+                email = serializer.validated_data.get('email')
+                phone = serializer.validated_data.get('contact')
                 hotel = HotelsAccount.objects.create(
                     hotel_name = serializer.validated_data.get('hotel_name'),
                     description = serializer.validated_data.get('description'),
-                    alt_contact = serializer.validated_data.get('alt_contact'),
                     certificate = serializer.validated_data.get('certificate'),
                     contact = phone,
+                    alt_contact = serializer.validated_data.get('alt_contact'),
+                    address = serializer.validated_data.get('address'),
                     email = email,
-                    address = serializer.validated_data.get('adress'),
-                    location = serializer.validated_data.get('location'),
+                    location = serializer.validated_data.get('location')
                 )
+                print('blaaaaaaah')
+                print('hotel')
                 message = "Your requst for Adding Your hotel in our website is sussessfull, We will inform you ASAP"
                 subject = "Hungry hub notification"
                 send_email(message=message,subject=subject,email=email)
                 hashed_otp = send_phone(phone)
                 request.session['hashed_otp'] = hashed_otp
                 request.session['phone'] = phone
-                owner = HotelOwner.objects.get(user=request.user)
                 hotel.owner = owner
                 hotel.save()
                 return Response({'msg':'Registration request successfull...'},status=status.HTTP_200_OK)
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({'msg':'You are not a registered owner.'},status=status.HTTP_400_BAD_REQUEST)
+            except:
+                return Response({'msg':'You are not a registered owner.'},status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
 
-
-
-
-    def patch(self,request):
+    def get(self,request):
         try:
             owner = HotelOwner.objects.get(user=request.user)
-            hotel = HotelsAccount.objects.get(owner=owner)
-            serializer = HotelAccountSeriallizer(HotelsAccount,request.data,partial=True)
-            if serializer.is_valid():
-                email = serializer.validated_data.get('email')
-                phone = serializer.validated_data.get('contact')
-                message = "Updated Your Hotel profile."
-                subject = "Hungry hub ."
-                send_email(message=message,subject=subject,email=email)
-                if hotel.contact != phone:
-                    hotel.is_active = False
-                    hashed_otp = send_phone(phone)
-                    request.session['hashed_otp'] = hashed_otp
-                    request.session['phone'] = phone
-                    hotel.save()
-                serializer.save()
-                # please verify your phone alert while changing the phone number
-                return Response(serializer.data,status=status.HTTP_200_OK)
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            hotels = HotelsAccount.objects.filter(owner=owner)
+            serializer = HotelAccountSeriallizer(hotels,many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
         except:
-            return Response({'Register owner form first...'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'msg':'You are not a registered owner...'})
             
 
 
@@ -145,19 +131,24 @@ class HotelLoginOtp(APIView):
     def post(self,request):
         try:
             owner = HotelOwner.objects.get(user=request.user)
-            hotel = HotelsAccount.objects.get(owner=owner)
-            email = hotel.email
-            subject = "Hungry hub code for Login"
-            otp=random.randint(100000,999999)
-            request.session['otp']=otp
-            request.session['email']=email
-            message = f"Your code for login is = {otp}"
-            send_email(email=email,subject=subject,message=message)
-            return Response({'msg':'Code has sent to your mail'},status=status.HTTP_200_OK)
+            serializer = EmailSeriaizer(data=request.data)
+            if serializer.is_valid():
+                hotel_email = serializer.validated_data.get('email')
+                print(hotel_email)
+                hotel = HotelsAccount.objects.get(email=hotel_email)
+                email = hotel.email
+                subject = "Hungry hub code for Login"
+                otp=random.randint(100000,999999)
+                request.session['otp']=otp
+                request.session['email']=email
+                message = f"Your code for login is = {otp}"
+                send_email(email=email,subject=subject,message=message)
+                return Response({'msg':'Code has sent to registerd hotel mail your mail'},status=status.HTTP_200_OK)
         except:
             return Response({'msg':'You are not a owner'},status=status.HTTP_400_BAD_REQUEST)
 
 
+# hotel login with otp
 
 @permission_classes([IsAuthenticated])
 class HotelAccountLogin(APIView):
@@ -173,9 +164,73 @@ class HotelAccountLogin(APIView):
                 return Response({'msg':'Login Successfull'},status=status.HTTP_200_OK)
             return Response({'msg':'Invalid otp'},status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
 
 
+# hotel logout 
+
+@permission_classes([IsAuthenticated])
+class HotelLogout(APIView):
+    def post(self,request):
+        try:
+            serializer = EmailSeriaizer(data=request.data)
+            if serializer.is_valid():
+                hotel_email = serializer.validated_data.get('email')
+                print(hotel_email)
+                hotel = HotelsAccount.objects.get(email=hotel_email)
+                hotel.is_logined = False
+                hotel.save()
+                request.session.flush()
+                return Response({'msg':'Logout success'},status=status.HTTP_200_OK)
+        except:
+            return Response({'msg':'Something wrong'},status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+@authentication_classes([AuthenticateHotel])
+@permission_classes([IsAuthenticated])
+class Checkkkkk(APIView):
+    def get(self,request):
+        return Response({"msg":"hiiiii"},status=status.HTTP_200_OK)
 
 
 
 # Create your views here.
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # Theatre patch
+
+    # def patch(self,request):
+    #     try:
+    #         owner = HotelOwner.objects.get(user=request.user)
+    #         hotel = HotelsAccount.objects.get(owner=owner)
+    #         serializer = HotelAccountSeriallizer(HotelsAccount,request.data,partial=True)
+    #         if serializer.is_valid():
+    #             email = serializer.validated_data.get('email')
+    #             phone = serializer.validated_data.get('contact')
+    #             message = "Updated Your Hotel profile."
+    #             subject = "Hungry hub ."
+    #             send_email(message=message,subject=subject,email=email)
+    #             if hotel.contact != phone:
+    #                 hotel.is_active = False
+    #                 hashed_otp = send_phone(phone)
+    #                 request.session['hashed_otp'] = hashed_otp
+    #                 request.session['phone'] = phone
+    #                 hotel.save()
+    #             serializer.save()
+    #             # please verify your phone alert while changing the phone number
+    #             return Response(serializer.data,status=status.HTTP_200_OK)
+    #         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    #     except:
+    #         return Response({'Register owner form first...'},status=status.HTTP_400_BAD_REQUEST)

@@ -14,7 +14,7 @@ class HotelOwner(models.Model):
 
 
 class HotelsAccount(models.Model):
-    owner = models.ForeignKey(HotelOwner,on_delete=models.PROTECT,related_name='hotelaccount')
+    owner = models.ForeignKey(HotelOwner,on_delete=models.PROTECT,related_name='hotelaccount',null=True,blank=True)
     hotel_name = models.CharField(max_length=255)
     description = models.TextField()
     contact = models.CharField(max_length=100)
@@ -23,10 +23,10 @@ class HotelsAccount(models.Model):
     email = models.EmailField(unique=True)
     address = models.TextField()
     location = models.PointField(srid=4326)
-    rating = models.FloatField()
+    rating = models.FloatField(null=True,blank=True)
 
     is_active = models.BooleanField(default=False)
-    is_logined = models.BooleanField(default=True)
+    is_logined = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
 
 
