@@ -11,10 +11,12 @@ from .google import Google
 
 class TokenSerializer(TokenObtainPairSerializer):
     @classmethod
-    def get_token(cls, user):
+    def get_token(cls, user, **kwargs):
         token = super().get_token(user)
         if user.email:
             token['email'] = user.email
+        if kwargs:
+            token['hotel_email'] = kwargs['hotel_email']
         return token
 
 

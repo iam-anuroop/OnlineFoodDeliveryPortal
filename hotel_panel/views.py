@@ -2,7 +2,12 @@ from django.shortcuts import render
 from rest_framework.decorators import permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from .serializer import OwnerSerializer,HotelAccountSeriallizer,EmailSeriaizer
+from .serializer import (
+    OwnerSerializer,
+    HotelAccountSeriallizer,
+    EmailSeriaizer
+) 
+from accounts.views import get_tokens_for_user
 from accounts.utils import send_email,send_phone,verify_user_code
 from .models import HotelOwner,HotelsAccount
 from rest_framework.response import Response
@@ -150,6 +155,7 @@ class HotelLoginOtp(APIView):
 
 # hotel login with otp
 
+
 @permission_classes([IsAuthenticated])
 class HotelAccountLogin(APIView):
     def post(self,request):
@@ -161,7 +167,9 @@ class HotelAccountLogin(APIView):
             if user_otp == otp:
                 hotel = HotelsAccount.objects.get(email=email)
                 hotel.is_logined = True
-                return Response({'msg':'Login Successfull'},status=status.HTTP_200_OK)
+                user = request.user
+                token = get_tokens_for_user(user,hotel_email=email)
+                return Response({'msg':'Login Successfull','token':token},status=status.HTTP_200_OK)
             return Response({'msg':'Invalid otp'},status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
@@ -191,6 +199,7 @@ class HotelLogout(APIView):
 @permission_classes([IsAuthenticated])
 class Checkkkkk(APIView):
     def get(self,request):
+        print('jijijijij')
         return Response({"msg":"hiiiii"},status=status.HTTP_200_OK)
 
 

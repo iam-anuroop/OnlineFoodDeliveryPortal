@@ -13,10 +13,10 @@ from rest_framework.permissions import IsAuthenticated
 
 
 
-def get_tokens_for_user(user):
+def get_tokens_for_user(user,**kwargs):
     refresh = RefreshToken.for_user(user)
     
-    access_token = TokenSerializer.get_token(user)
+    access_token = TokenSerializer.get_token(user,**kwargs)
 
     return {
         'refresh': str(refresh),
