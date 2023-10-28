@@ -5,11 +5,11 @@ from rest_framework.views import APIView
 from .serializer import (
     OwnerSerializer,
     HotelAccountSeriallizer,
-    EmailSeriaizer
+    EmailSeriaizer,FoodmenuSerializer
 ) 
 from accounts.views import get_tokens_for_user
 from accounts.utils import send_email,send_phone,verify_user_code
-from .models import HotelOwner,HotelsAccount
+from .models import HotelOwner,HotelsAccount,FoodMenu
 from rest_framework.response import Response
 from rest_framework import status
 from accounts.models import MyUser
@@ -75,8 +75,6 @@ class HotelAccountRegister(APIView):
                     email = email,
                     location = serializer.validated_data.get('location')
                 )
-                print('blaaaaaaah')
-                print('hotel')
                 message = "Your requst for Adding Your hotel in our website is sussessfull, We will inform you ASAP"
                 subject = "Hungry hub notification"
                 send_email(message=message,subject=subject,email=email)
@@ -197,9 +195,15 @@ class HotelLogout(APIView):
 
 @authentication_classes([AuthenticateHotel])
 @permission_classes([IsAuthenticated])
-class Checkkkkk(APIView):
-    def get(self,request):
-        print('jijijijij')
+class FoodmenuView(APIView):
+    def post(self,request):
+        serializer = FoodmenuSerializer(data=request.data)
+        if serializer.is_valid():
+            food = FoodMenu.objects.create()
+
+        hotel_email = request.auth
+
+
         return Response({"msg":"hiiiii"},status=status.HTTP_200_OK)
 
 

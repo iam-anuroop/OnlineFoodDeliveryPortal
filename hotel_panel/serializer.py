@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import HotelsAccount,HotelOwner
+from .models import HotelsAccount,HotelOwner,FoodMenu
+
 
 
 
@@ -9,13 +10,18 @@ class OwnerSerializer(serializers.ModelSerializer):
         fields = ['first_name','last_name','email','contact','id_proof','id_number']
 
 
+class EmailSeriaizer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
 class HotelAccountSeriallizer(serializers.ModelSerializer):
     class Meta:
         model = HotelsAccount
         exclude = ['owner','is_approved','rating','is_active']
 
 
-
-class EmailSeriaizer(serializers.Serializer):
-    email = serializers.EmailField()
+class FoodmenuSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FoodMenu
+        fields = '__all__'
 
