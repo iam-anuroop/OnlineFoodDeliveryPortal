@@ -10,7 +10,7 @@ from rest_framework.generics import GenericAPIView
 import random
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
-
+import base64
 
 
 def get_tokens_for_user(user,**kwargs):
@@ -44,20 +44,25 @@ class RegisterWithEmail(APIView):
             subject = "OTP for login."
             message = f"മോനെ ഇതാണ് നിന്റെ otp = {otp}"
             send_email(email=email,message=message,subject=subject)
-            request.session['login_otp'] = otp
-            request.session['login_email'] = email
-            return Response({'msg':'OTP send to your mail...'},status=status.HTTP_200_OK)
+            otp = str(otp)
+            encoded_key = base64.b64encode(otp.encode('utf-8')).decode('utf-8')
+
+
+            
+            return Response({'msg':'OTP send to your mail...','key':encoded_key,'email':email},status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginWithOtp(APIView):
     def post(self,request):
         serializer = OtpSerializer(data=request.data)
+        print(request.data)
         if serializer.is_valid():
             otp = serializer.validated_data.get('otp')
-            login_otp = request.session.get('login_otp')
-            login_email = request.session.get('login_email')
-            if otp == login_otp:
+            key = request.data.get('key')
+            login_email = request.data.get('email')
+            login_otp = base64.b64decode(key.encode('utf-8')).decode('utf-8')
+            if int(otp) == int(login_otp):
                 try:
                     user = MyUser.objects.get(email=login_email)
                     token = get_tokens_for_user(user)
