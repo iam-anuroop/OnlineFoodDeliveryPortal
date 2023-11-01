@@ -12,25 +12,22 @@ import json, urllib
 from decouple import config
 
 
-
-
 class UserCurrentLocation(APIView):
     def post(self,request):
+        print('haaaaaaaaaaaaaaaa')
         client_ip, is_routable = get_client_ip(request)
-        # if client_ip is None:
-        #     client_ip='0.0.0.0'
         if is_routable:
             ip_type = 'public'
         else:
             ip_type = 'private'
-        ip_address = "218.53.14.236"
+        client_ip = "103.42.196.132"
         auth = config('FIND_IP_AUTH')
-        url = "https://api.ipfind.com/?auth="+auth+"&ip="+ip_address
+        url = "https://api.ipfind.com/?auth="+auth+"&ip="+client_ip
         resp = urllib.request.urlopen(url)
         data1 = json.loads(resp.read())
         data1['client_ip'] = client_ip
         data1['ip_type'] = ip_type
-        return Response(data1)
+        return Response(data1,status=status.HTTP_200_OK)
 
 
 
