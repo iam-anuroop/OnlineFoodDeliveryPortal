@@ -39,7 +39,7 @@ class ProfileManage(APIView):
         serializer = UserSerilaizer(user)
         return Response({'data':serializer.data},status=status.HTTP_200_OK)
     
-    def patch(self, request):
+    def patch(self,request):
         user = request.user
         try:
             profile = UserProfile.objects.get(user=user)
@@ -50,12 +50,12 @@ class ProfileManage(APIView):
                     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            UserProfile.objects.create(user=user)
-            serializer = UserSerilaizer(user, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({'data': serializer.data}, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # UserProfile.objects.create(user=user)
+            # serializer = UserSerilaizer(user, data=request.data, partial=True)
+            # if serializer.is_valid():
+            #     serializer.save()
+            #     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+            return Response({'msg':'something wrong...'}, status=status.HTTP_400_BAD_REQUEST)
 
 
     def delete(self,request):

@@ -46,10 +46,7 @@ class RegisterWithEmail(APIView):
             send_email(email=email,message=message,subject=subject)
             otp = str(otp)
             encoded_key = base64.b64encode(otp.encode('utf-8')).decode('utf-8')
-
-
-            
-            return Response({'msg':'OTP send to your mail...','key':encoded_key,'email':email},status=status.HTTP_200_OK)
+            return Response({'msg':'OTP send to your mail...','otp':otp,'key':encoded_key,'email':email},status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -109,7 +106,7 @@ class VerifyPhoneOtp(APIView):
             try:
                 verify_status = verify_user_code(hashed_otp,otp)
                 user = request.user
-                user = MyUser.objects.get(id=10)
+                user = MyUser.objects.get(id=user.id)
                 if verify_status == 'approved':
                     user.phone = phone
                     user.save()

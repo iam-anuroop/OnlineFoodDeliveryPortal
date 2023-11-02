@@ -28,7 +28,6 @@ def register_social_user(provider, user_id, email, name):
             'username':name,
         }
         user = MyUser.objects.create_user(**user)
-        user.auth_provider = 'google'
         user.is_active =True
         user.save()
         return{

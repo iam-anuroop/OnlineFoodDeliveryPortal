@@ -22,7 +22,6 @@ class UserSerilaizer(serializers.ModelSerializer):
         instance.phone = validated_data.get('phone', instance.phone)
         instance.email = validated_data.get('email', instance.email)
         instance.save()
-
         userprofile_data = validated_data.pop('userprofile', None)
         if userprofile_data:
             userprofile = instance.userprofile
