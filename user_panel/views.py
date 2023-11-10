@@ -45,6 +45,7 @@ class ProfileManage(APIView):
             profile = UserProfile.objects.get(user=user)
             if profile:
                 serializer = UserSerilaizer(user, data=request.data, partial=True)
+                print(request.data)
                 if serializer.is_valid():
                     serializer.save()
                     return Response({'data': serializer.data}, status=status.HTTP_200_OK)

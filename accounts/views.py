@@ -86,36 +86,36 @@ class VerifyMobileNumber(APIView):
             phone = serilaizer.validated_data.get('phone')
             try:
                 hashed_otp=send_phone(phone)
-                request.session['hashed_otp']=hashed_otp
-                request.session['phone']=phone
-                return Response({'data':serilaizer.data,'msg':'Otp sent successfully...'},status=status.HTTP_200_OK)
+                return Response({'v_id':hashed_otp,'msg':'Otp sent successfully...'},status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({'msg':'Cant sent otp, Please try after sometimes...'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serilaizer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 
-
+@permission_classes([IsAuthenticated])
 class VerifyPhoneOtp(APIView):
     def post(self,request):
-        serilaizer = OtpSerializer(data=request.data)
-        if serilaizer.is_valid():
-            otp = serilaizer.validated_data.get('otp')
-            hashed_otp = request.session.get('hashed_otp')
-            phone = request.session.get('phone')
-            try:
-                verify_status = verify_user_code(hashed_otp,otp)
-                user = request.user
-                user = MyUser.objects.get(id=user.id)
-                if verify_status == 'approved':
-                    user.phone = phone
-                    user.save()
-                    return Response({'msg':'Success...'},status=status.HTTP_200_OK)
-                elif verify_status == 'rejected':
-                    return Response({'msg':'Wrong otp...'},status=status.HTTP_400_BAD_REQUEST)
-            except:
-                return Response({'msg':'Somrthing wrong...'},status=status.HTTP_400_BAD_REQUEST)
-        return Response(serilaizer.errors,status=status.HTTP_400_BAD_REQUEST)
+        otp = request.data.get('otp')
+        hashed_otp = request.data.get('v_id')
+        phone = request.data.get('phone')
+        print(otp,hashed_otp,phone)
+        try:
+            print('hiiii')
+            verify_status = verify_user_code(hashed_otp,otp)
+            user = request.user
+            user = MyUser.objects.get(id=user.id)
+            print('hooo')
+            if verify_status == 'approved':
+                user.phone = phone
+                user.save()
+                return Response({'msg':'Success...'},status=status.HTTP_200_OK)
+            elif verify_status == 'rejected':
+                return Response({'msg':'Wrong otp...'},status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            return Response({'msg':'Somrthing wrong...'},status=status.HTTP_400_BAD_REQUEST)
+        return Response({'msg':'something wrong'},status=status.HTTP_400_BAD_REQUEST)
 
 
 
