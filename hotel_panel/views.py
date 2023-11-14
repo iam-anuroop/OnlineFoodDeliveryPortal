@@ -36,6 +36,7 @@ class OwnerAccountView(APIView):
                 id_number = serializer.validated_data.get('id_number')
             )
             owner.user = user
+            owner.save()
             subject = "You have a message"
             message = "Created the owner account continue and register your hotel"
             email = serializer.validated_data.get('email')
@@ -60,6 +61,7 @@ class OwnerAccountView(APIView):
 class HotelAccountRegister(APIView):
     def post(self,request):
         serializer = HotelAccountSeriallizer(data=request.data)
+        print(serializer)
         if serializer.is_valid():
             try:
                 owner = HotelOwner.objects.get(user=request.user)
@@ -83,9 +85,11 @@ class HotelAccountRegister(APIView):
                 request.session['phone'] = phone
                 hotel.owner = owner
                 hotel.save()
-                return Response({'msg':'Registration request successfull...'},status=status.HTTP_200_OK)
+                return Response({'msg':'Registration request successfull...',
+                                 'vid':hashed_otp},status=status.HTTP_200_OK)
             except:
                 return Response({'msg':'You are not a registered owner.'},status=status.HTTP_400_BAD_REQUEST)
+        print(serializer.errors)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
 

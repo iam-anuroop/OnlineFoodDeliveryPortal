@@ -7,14 +7,13 @@ from django.template.loader import render_to_string
 
 
 client = Client(settings.ACCOUNT_SID,settings.AUTH_TOKEN)
-def send_phone(email):
+def send_phone(phone):
     try: 
-        print(email,'llll')
         verification = client.verify \
                         .v2 \
                         .services(settings.SERVICE_SID) \
                         .verifications \
-                        .create(to=email, channel='sms')
+                        .create(to=phone, channel='sms')
         return verification.sid
     except ConnectionError as e:
         raise e

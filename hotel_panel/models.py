@@ -8,7 +8,7 @@ class HotelOwner(models.Model):
     last_name = models.CharField(max_length=255,null=True,blank=True)
     email = models.EmailField(null=True,blank=True)
     contact = models.CharField(max_length=100,null=True,blank=True)
-    id_proof = models.CharField(null=True,blank=True)
+    id_proof = models.FileField(null=True,blank=True,upload_to='owner_id')
     id_number = models.CharField(max_length=255,null=True,blank=True)
 
 
@@ -19,10 +19,12 @@ class HotelsAccount(models.Model):
     description = models.TextField()
     contact = models.CharField(max_length=100)
     alt_contact = models.CharField(max_length=100)
-    certificate = models.CharField()
+    certificate = models.FileField(upload_to='hotel_certificate')
     email = models.EmailField(unique=True)
     address = models.TextField()
-    location = models.PointField(srid=4326)
+    country = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    location = models.PointField(srid=4326,null=True,blank=True)
     rating = models.FloatField(null=True,blank=True)
 
     is_active = models.BooleanField(default=False)
@@ -35,7 +37,7 @@ class FoodMenu(models.Model):
     hotel = models.ForeignKey(HotelsAccount,on_delete=models.CASCADE,related_name='foodmenu')
     food_name = models.CharField(max_length=255)
     food_type = models.CharField(max_length=255)
-    food_image = models.CharField()
+    food_image = models.FileField()
     food_price = models.FloatField()
     description = models.TextField()
 
