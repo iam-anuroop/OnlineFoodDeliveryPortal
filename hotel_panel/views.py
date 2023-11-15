@@ -16,6 +16,7 @@ from accounts.models import MyUser
 from accounts.serializers import OtpSerializer
 import random
 from .customauth import AuthenticateHotel
+import base64
 
 
 
@@ -81,12 +82,14 @@ class HotelAccountRegister(APIView):
                 subject = "Hungry hub notification"
                 send_email(message=message,subject=subject,email=email)
                 hashed_otp = send_phone(phone)
-                request.session['hashed_otp'] = hashed_otp
-                request.session['phone'] = phone
+                # request.session['hashed_otp'] = hashed_otp
+                # request.session['phone'] = phone
                 hotel.owner = owner
+                owner.is_owner = True
+                owner.save()
                 hotel.save()
                 return Response({'msg':'Registration request successfull...',
-                                 'vid':hashed_otp},status=status.HTTP_200_OK)
+                                 'vid':hashed_otp,'phone':phone},status=status.HTTP_200_OK)
             except:
                 return Response({'msg':'You are not a registered owner.'},status=status.HTTP_400_BAD_REQUEST)
         print(serializer.errors)
@@ -96,7 +99,7 @@ class HotelAccountRegister(APIView):
     def get(self,request):
         try:
             owner = HotelOwner.objects.get(user=request.user)
-            hotels = HotelsAccount.objects.filter(owner=owner)
+            hotels = HotelsAccount.objects.filter(owner=owner,is_active=True)
             serializer = HotelAccountSeriallizer(hotels,many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except:
@@ -110,8 +113,8 @@ class HotelAccountRegister(APIView):
 class VerifyHotelPhone(APIView):
     def post(self,request):
         serializer = OtpSerializer(data=request.data)
-        hashed_otp = request.session.get('hashed_otp')
-        phone = request.session.get('phone')
+        hashed_otp = request.data.get('vid')
+        phone = request.data.get('phone')
         if serializer.is_valid():
             otp = serializer.validated_data.get('otp')
             try:
@@ -138,19 +141,20 @@ class HotelLoginOtp(APIView):
     def post(self,request):
         try:
             owner = HotelOwner.objects.get(user=request.user)
-            serializer = EmailSeriaizer(data=request.data)
-            if serializer.is_valid():
-                hotel_email = serializer.validated_data.get('email')
-                print(hotel_email)
-                hotel = HotelsAccount.objects.get(email=hotel_email)
-                email = hotel.email
-                subject = "Hungry hub code for Login"
-                otp=random.randint(100000,999999)
-                request.session['otp']=otp
-                request.session['email']=email
-                message = f"Your code for login is = {otp}"
-                send_email(email=email,subject=subject,message=message)
-                return Response({'msg':'Code has sent to registerd hotel mail your mail'},status=status.HTTP_200_OK)
+            # serializer = EmailSeriaizer(data=request.data)
+            # if serializer.is_valid():
+                # hotel_email = serializer.validated_data.get('email')
+                # print(hotel_email)
+            hotel = HotelsAccount.objects.get(owner=owner)
+            email = hotel.email
+            subject = "Hungry hub code for Login"
+            otp=random.randint(100000,999999)
+            # request.session['otp']=otp
+            # request.session['email']=email
+            message = f"Your code for login is = {otp}"
+            send_email(email=email,subject=subject,message=message)
+            encoded_key = base64.b64encode(otp.encode('utf-8')).decode('utf-8')
+            return Response({'msg':'Code has sent to registerd hotel mail your mail','otp':otp,'key':encoded_key,'email':email},status=status.HTTP_200_OK)
         except:
             return Response({'msg':'You are not a owner'},status=status.HTTP_400_BAD_REQUEST)
 
@@ -163,14 +167,18 @@ class HotelAccountLogin(APIView):
     def post(self,request):
         serializer = OtpSerializer(data=request.data)
         if serializer.is_valid():
-            user_otp = serializer.validated_data.get('otp')
-            email = request.session.get('email')
-            otp = request.session.get('otp')
-            if user_otp == otp:
+            # user_otp = serializer.validated_data.get('otp')
+            # email = request.session.get('email')
+            # otp = request.session.get('otp')
+            otp = serializer.validated_data.get('otp')
+            key = request.data.get('key')
+            email = request.data.get('email')
+            login_otp = base64.b64decode(key.encode('utf-8')).decode('utf-8')
+            if int(login_otp) == int(otp):
                 hotel = HotelsAccount.objects.get(email=email)
-                hotel.is_logined = True
+                # hotel.is_logined = True
                 user = request.user
-                token = get_tokens_for_user(user,hotel_email=email)
+                token = get_tokens_for_user(user,hotel_email=hotel.email)
                 return Response({'msg':'Login Successfull','token':token},status=status.HTTP_200_OK)
             return Response({'msg':'Invalid otp'},status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
