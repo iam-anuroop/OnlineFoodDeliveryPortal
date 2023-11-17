@@ -37,13 +37,12 @@ class FoodMenu(models.Model):
     hotel = models.ForeignKey(HotelsAccount,on_delete=models.CASCADE,related_name='foodmenu')
     food_name = models.CharField(max_length=255)
     food_type = models.CharField(max_length=255)
-    food_image = models.FileField()
+    food_image = models.CharField()
     food_price = models.FloatField()
     description = models.TextField()
 
     is_veg = models.BooleanField(default=False)
     is_available = models.BooleanField(default=False)
-
 
 
 

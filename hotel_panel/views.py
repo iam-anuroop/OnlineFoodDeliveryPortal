@@ -62,7 +62,7 @@ class OwnerAccountView(APIView):
 class HotelAccountRegister(APIView):
     def post(self,request):
         serializer = HotelAccountSeriallizer(data=request.data)
-        print(serializer)
+        # print(serializer)
         if serializer.is_valid():
             try:
                 owner = HotelOwner.objects.get(user=request.user)
@@ -82,8 +82,6 @@ class HotelAccountRegister(APIView):
                 subject = "Hungry hub notification"
                 send_email(message=message,subject=subject,email=email)
                 hashed_otp = send_phone(phone)
-                # request.session['hashed_otp'] = hashed_otp
-                # request.session['phone'] = phone
                 hotel.owner = owner
                 owner.is_owner = True
                 owner.save()
@@ -186,37 +184,62 @@ class HotelAccountLogin(APIView):
 
 
 # hotel logout 
-
-@permission_classes([IsAuthenticated])
-class HotelLogout(APIView):
+# @permission_classes([IsAuthenticated])
+# class HotelLogout(APIView):
+#     def post(self,request):
+#         try:
+#             serializer = EmailSeriaizer(data=request.data)
+#             if serializer.is_valid():
+#                 hotel_email = serializer.validated_data.get('email')
+#                 print(hotel_email)
+#                 hotel = HotelsAccount.objects.get(email=hotel_email)
+#                 hotel.is_logined = False
+#                 hotel.save()
+#                 request.session.flush()
+#                 return Response({'msg':'Logout success'},status=status.HTTP_200_OK)
+#         except:
+#             return Response({'msg':'Something wrong'},status=status.HTTP_400_BAD_REQUEST)
+@authentication_classes([AuthenticateHotel])
+@permission_classes([IsAuthenticated])  
+class VerifyHotelPhone(APIView):
     def post(self,request):
-        try:
-            serializer = EmailSeriaizer(data=request.data)
-            if serializer.is_valid():
-                hotel_email = serializer.validated_data.get('email')
-                print(hotel_email)
-                hotel = HotelsAccount.objects.get(email=hotel_email)
-                hotel.is_logined = False
-                hotel.save()
-                request.session.flush()
-                return Response({'msg':'Logout success'},status=status.HTTP_200_OK)
-        except:
-            return Response({'msg':'Something wrong'},status=status.HTTP_400_BAD_REQUEST)
-        
+        hotel_email = request.auth
+        if hotel_email:
+            hotel = HotelsAccount.objects.get(email = hotel_email)
+            hashed_otp = send_phone(hotel.contact)
+            return Response({'msg':'Otp send to your registered numebr','vid':hashed_otp,'phone':hotel.contact},status=status.HTTP_200_OK)
+        return Response({'msg':'login before tryyy...!'},status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 
 @authentication_classes([AuthenticateHotel])
 @permission_classes([IsAuthenticated])
 class FoodmenuView(APIView):
     def post(self,request):
-        serializer = FoodmenuSerializer(data=request.data)
-        if serializer.is_valid():
-            food = FoodMenu.objects.create()
-
         hotel_email = request.auth
+        if hotel_email:
+            hotel = HotelsAccount.objects.get(email=hotel_email)
+            serializer = FoodmenuSerializer(data=request.data)
+            if serializer.is_valid():
+                food = FoodMenu.objects.create(
+                    food_name = serializer.validated_data.get('food_name'),
+                    food_type = serializer.validated_data.get('food_type'),
+                    food_image = serializer.validated_data.get('food_image'),
+                    food_price = serializer.validated_data.get('food_price'),
+                    description = serializer.validated_data.get('description'),
+                    is_veg = serializer.validated_data.get('is_veg')
+                )
+                food.hotel = hotel
+                food.save()
+                return Response({'msg':'food item added'},status=status.HTTP_200_OK)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'msg':'You are not logined'},status=status.HTTP_400_BAD_REQUEST)
 
 
-        return Response({"msg":"hiiiii"},status=status.HTTP_200_OK)
+
 
 
 

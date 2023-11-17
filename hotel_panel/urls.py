@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     OwnerAccountView,HotelAccountRegister,
     VerifyHotelPhone,HotelAccountLogin,
-    HotelLoginOtp,HotelLogout,FoodmenuView
+    HotelLoginOtp,FoodmenuView
                     )
 
 urlpatterns = [
@@ -11,6 +11,5 @@ urlpatterns = [
     path('hotelphone/',VerifyHotelPhone.as_view(),name='hotelphone'),
     path('hotelotp/',HotelLoginOtp.as_view(),name='hotelotp'),
     path('hotellogin/',HotelAccountLogin.as_view(),name='hotellogin'),
-    path('hotellogout/',HotelLogout.as_view(),name='hotellogout'),
     path('check/',FoodmenuView.as_view(),name='check'),
 ]
