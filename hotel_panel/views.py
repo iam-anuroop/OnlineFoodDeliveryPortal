@@ -17,6 +17,7 @@ from accounts.serializers import OtpSerializer
 import random
 from .customauth import AuthenticateHotel
 import base64
+from django.db.models import Q
 
 
 
@@ -37,6 +38,8 @@ class OwnerAccountView(APIView):
                 id_number = serializer.validated_data.get('id_number')
             )
             owner.user = user
+            user.is_owner = True
+            user.save()
             owner.save()
             subject = "You have a message"
             message = "Created the owner account continue and register your hotel"
@@ -83,8 +86,6 @@ class HotelAccountRegister(APIView):
                 send_email(message=message,subject=subject,email=email)
                 hashed_otp = send_phone(phone)
                 hotel.owner = owner
-                owner.is_owner = True
-                owner.save()
                 hotel.save()
                 return Response({'msg':'Registration request successfull...',
                                  'vid':hashed_otp,'phone':phone},status=status.HTTP_200_OK)
@@ -98,6 +99,7 @@ class HotelAccountRegister(APIView):
         try:
             owner = HotelOwner.objects.get(user=request.user)
             hotels = HotelsAccount.objects.filter(owner=owner,is_active=True)
+            print(hotels)
             serializer = HotelAccountSeriallizer(hotels,many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except:
@@ -143,7 +145,8 @@ class HotelLoginOtp(APIView):
             # if serializer.is_valid():
                 # hotel_email = serializer.validated_data.get('email')
                 # print(hotel_email)
-            hotel = HotelsAccount.objects.get(owner=owner)
+            hotel_id = request.data.get('hotel_id')
+            hotel = HotelsAccount.objects.get(id=hotel_id,owner=owner)
             email = hotel.email
             subject = "Hungry hub code for Login"
             otp=random.randint(100000,999999)
@@ -183,22 +186,7 @@ class HotelAccountLogin(APIView):
     
 
 
-# hotel logout 
-# @permission_classes([IsAuthenticated])
-# class HotelLogout(APIView):
-#     def post(self,request):
-#         try:
-#             serializer = EmailSeriaizer(data=request.data)
-#             if serializer.is_valid():
-#                 hotel_email = serializer.validated_data.get('email')
-#                 print(hotel_email)
-#                 hotel = HotelsAccount.objects.get(email=hotel_email)
-#                 hotel.is_logined = False
-#                 hotel.save()
-#                 request.session.flush()
-#                 return Response({'msg':'Logout success'},status=status.HTTP_200_OK)
-#         except:
-#             return Response({'msg':'Something wrong'},status=status.HTTP_400_BAD_REQUEST)
+
 @authentication_classes([AuthenticateHotel])
 @permission_classes([IsAuthenticated])  
 class VerifyHotelPhone(APIView):
@@ -237,6 +225,37 @@ class FoodmenuView(APIView):
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'msg':'You are not logined'},status=status.HTTP_400_BAD_REQUEST)
+    
+
+    def patch(self,request):
+        hotel_email = request.auth
+        if hotel_email:
+            # hotel = HotelsAccount.objects.get(email = hotel_email)
+            id = request.data.get('id')
+            food = FoodMenu.objects.get(id=id)
+            serializer = FoodmenuSerializer(food,data=request.data,partial=True)
+            if serializer.is_valid():
+
+                food.food_name = serializer.validated_data.get('food_name')
+                food.food_type = serializer.validated_data.get('food_type')
+                food.food_image = serializer.validated_data.get('food_image')
+                food.food_price = serializer.validated_data.get('food_price')
+                food.description = serializer.validated_data.get('description')
+                food.is_veg = serializer.validated_data.get('is_veg')
+                food.is_available = serializer.validated_data.get('is_available')
+
+                food.save()
+                return Response({'msg':'updated'},status=status.HTTP_200_OK)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        return Response({'msg':'something wrooong'},status=status.HTTP_400_BAD_REQUEST)
+    
+    # def get(self,request):
+    #     q = request.GET.get('q')
+    #     search_query = Q()
+    #     if q:
+    #         search_query = Q(food_name__icontains=q) | Q(food_type__icontains=q)
+            
+
 
 
 

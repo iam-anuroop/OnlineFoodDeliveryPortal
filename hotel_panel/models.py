@@ -22,8 +22,8 @@ class HotelsAccount(models.Model):
     certificate = models.FileField(upload_to='hotel_certificate')
     email = models.EmailField(unique=True)
     address = models.TextField()
-    country = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
+    country = models.CharField(max_length=100,null=True,blank=True)
+    state = models.CharField(max_length=100,null=True,blank=True)
     location = models.PointField(srid=4326,null=True,blank=True)
     rating = models.FloatField(null=True,blank=True)
 

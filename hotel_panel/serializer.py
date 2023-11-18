@@ -17,7 +17,7 @@ class EmailSeriaizer(serializers.Serializer):
 class HotelAccountSeriallizer(serializers.ModelSerializer):
     class Meta:
         model = HotelsAccount
-        exclude = ['owner','is_approved','rating','is_active']
+        exclude = ['owner','is_approved','is_active']
 
 
 class FoodmenuSerializer(serializers.ModelSerializer):
