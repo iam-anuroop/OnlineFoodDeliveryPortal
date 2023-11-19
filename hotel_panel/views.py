@@ -99,7 +99,6 @@ class HotelAccountRegister(APIView):
         try:
             owner = HotelOwner.objects.get(user=request.user)
             hotels = HotelsAccount.objects.filter(owner=owner,is_active=True)
-            print(hotels)
             serializer = HotelAccountSeriallizer(hotels,many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except:
@@ -230,7 +229,7 @@ class FoodmenuView(APIView):
     def patch(self,request):
         hotel_email = request.auth
         if hotel_email:
-            # hotel = HotelsAccount.objects.get(email = hotel_email)
+            hotel = HotelsAccount.objects.get(email = hotel_email)
             id = request.data.get('id')
             food = FoodMenu.objects.get(id=id)
             serializer = FoodmenuSerializer(food,data=request.data,partial=True)
@@ -243,6 +242,7 @@ class FoodmenuView(APIView):
                 food.description = serializer.validated_data.get('description')
                 food.is_veg = serializer.validated_data.get('is_veg')
                 food.is_available = serializer.validated_data.get('is_available')
+                food.hotel = hotel
 
                 food.save()
                 return Response({'msg':'updated'},status=status.HTTP_200_OK)
