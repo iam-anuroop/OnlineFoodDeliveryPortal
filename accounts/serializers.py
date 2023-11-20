@@ -14,6 +14,8 @@ class TokenSerializer(TokenObtainPairSerializer):
     def get_token(cls, user, **kwargs):
         token = super().get_token(user)
         token['is_owner'] = user.is_owner
+        token['is_admin'] = user.is_admin
+        token['is_deliveryboy'] = user.is_deliveryboy
         if user.email:
             token['email'] = user.email
         if kwargs:
@@ -59,13 +61,4 @@ class MyuserPhoneSerializer(serializers.Serializer):
 
 class OtpSerializer(serializers.Serializer):
     otp = serializers.IntegerField()
-    
-
-
-
-
-
-
-
-
     

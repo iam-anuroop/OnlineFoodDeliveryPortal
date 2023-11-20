@@ -7,7 +7,14 @@ from .models import HotelsAccount,HotelOwner,FoodMenu
 class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = HotelOwner
-        fields = ['first_name','last_name','email','contact','id_proof','id_number']
+        fields = [
+            'first_name',
+            'last_name',
+            'email',
+            'contact',
+            'id_proof',
+            'id_number'
+            ]
 
 
 class EmailSeriaizer(serializers.Serializer):
@@ -17,11 +24,24 @@ class EmailSeriaizer(serializers.Serializer):
 class HotelAccountSeriallizer(serializers.ModelSerializer):
     class Meta:
         model = HotelsAccount
-        exclude = ['owner','is_approved','is_active']
+        exclude = [
+            'owner',
+            'is_approved',
+            'is_active'
+            ]
 
 
 class FoodmenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = FoodMenu
-        fields = '__all__'
+        fields = [
+            'id',
+            'food_name',
+            'food_type',
+            'food_image',
+            'food_price',
+            'description',
+            'is_veg',
+            'is_available'
+        ]
 
