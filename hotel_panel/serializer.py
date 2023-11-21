@@ -43,5 +43,5 @@ class FoodmenuSerializer(serializers.ModelSerializer):
             'description',
             'is_veg',
             'is_available'
-        ]
+        ]  
 

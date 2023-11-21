@@ -188,7 +188,7 @@ class HotelAccountLogin(APIView):
 
 @authentication_classes([AuthenticateHotel])
 @permission_classes([IsAuthenticated])  
-class VerifyHotelPhone(APIView):
+class HotelPhoneOtp(APIView):
     def post(self,request):
         hotel_email = request.auth
         if hotel_email:

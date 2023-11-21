@@ -180,11 +180,19 @@ SERVICE_SID = config('SERVICE_SID')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),'DEFAULT_TOKEN_CLASSES': (
+    ),
+    'DEFAULT_TOKEN_CLASSES': (
         'rest_framework_simplejwt.tokens.AccessToken',
     ),
     'TOKEN_MODEL': None,
+
+    # 'DEFAULT_PAGINATION_CLASS' : (
+    #     'rest_framework.pagination.PageNumberPagination',
+    # ),
+    # 'PAGE_SIZE' : 1,
+
 }
+
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=15),
