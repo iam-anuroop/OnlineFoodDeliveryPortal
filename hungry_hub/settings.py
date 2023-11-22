@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'user_panel',
     'hotel_panel',
     'admin_panel',
+    'pages'
 ]
 
 MIDDLEWARE = [

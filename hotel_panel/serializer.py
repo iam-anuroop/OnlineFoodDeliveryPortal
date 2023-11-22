@@ -40,6 +40,7 @@ class FoodmenuSerializer(serializers.ModelSerializer):
             'food_type',
             'food_image',
             'food_price',
+            'offer_price',
             'description',
             'is_veg',
             'is_available'

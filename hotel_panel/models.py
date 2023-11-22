@@ -24,6 +24,7 @@ class HotelsAccount(models.Model):
     address = models.TextField()
     country = models.CharField(max_length=100,null=True,blank=True)
     state = models.CharField(max_length=100,null=True,blank=True)
+    city = models.CharField(max_length=100,null=True,blank=True)
     location = models.PointField(srid=4326,null=True,blank=True)
     rating = models.FloatField(null=True,blank=True)
 
@@ -39,6 +40,7 @@ class FoodMenu(models.Model):
     food_type = models.CharField(max_length=255)
     food_image = models.CharField()
     food_price = models.FloatField()
+    offer_price = models.FloatField(null=True,blank=True)
     description = models.TextField()
 
     is_veg = models.BooleanField(default=False)
