@@ -18,6 +18,7 @@ import random
 from .customauth import AuthenticateHotel
 import base64
 from django.db.models import Q
+from drf_yasg.utils import swagger_auto_schema
 
 
 
@@ -25,6 +26,16 @@ from django.db.models import Q
 
 @permission_classes([IsAuthenticated])
 class OwnerAccountView(APIView):
+
+    @swagger_auto_schema(
+        tags=["Hotel Authentication"],
+        operation_description="Owner Registration for before hotel Regitsration",
+        responses={
+            200:OwnerSerializer,
+            400:"errors"
+        }
+    )
+
     def post(self,request):
         serializer = OwnerSerializer(data=request.data)
         if serializer.is_valid():
@@ -63,6 +74,15 @@ class OwnerAccountView(APIView):
 
 @permission_classes([IsAuthenticated])
 class HotelAccountRegister(APIView):
+
+    @swagger_auto_schema(
+        tags=["Hotel Authentication"],
+        operation_description="Hotel Registration and Sending otp to phone",
+        responses={
+            200:HotelAccountSeriallizer,
+            400:"errors"
+        }
+    )
     def post(self,request):
         serializer = HotelAccountSeriallizer(data=request.data)
         # print(serializer)
@@ -95,6 +115,14 @@ class HotelAccountRegister(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
 
+    @swagger_auto_schema(
+        tags=["Owners Hotel"],
+        operation_description="Getting all hotels of a owner",
+        responses={
+            200:HotelAccountSeriallizer,
+            400:"errors"
+        }
+    )
     def get(self,request):
         try:
             owner = HotelOwner.objects.get(user=request.user)
@@ -110,6 +138,15 @@ class HotelAccountRegister(APIView):
 
 @permission_classes([IsAuthenticated])
 class VerifyHotelPhone(APIView):
+
+    @swagger_auto_schema(
+        tags=["Hotel Authentication"],
+        operation_description="Hotel phone otp verification",
+        responses={
+            200:OtpSerializer,
+            400:"errors"
+        }
+    )
     def post(self,request):
         serializer = OtpSerializer(data=request.data)
         hashed_otp = request.data.get('vid')
@@ -137,6 +174,15 @@ class VerifyHotelPhone(APIView):
 
 @permission_classes([IsAuthenticated])
 class HotelLoginOtp(APIView):
+
+    @swagger_auto_schema(
+        tags=["Hotel Authentication"],
+        operation_description="Hotel sending otp to mail for login",
+        responses={
+            200:"Okay",
+            400:"errors"
+        }
+    )
     def post(self,request):
         try:
             owner = HotelOwner.objects.get(user=request.user)
@@ -153,7 +199,9 @@ class HotelLoginOtp(APIView):
             # request.session['email']=email
             message = f"Your code for login is = {otp}"
             send_email(email=email,subject=subject,message=message)
+            otp=str(otp)
             encoded_key = base64.b64encode(otp.encode('utf-8')).decode('utf-8')
+            print(encoded_key)
             return Response({'msg':'Code has sent to registerd hotel mail your mail','otp':otp,'key':encoded_key,'email':email},status=status.HTTP_200_OK)
         except:
             return Response({'msg':'You are not a owner'},status=status.HTTP_400_BAD_REQUEST)
@@ -164,6 +212,15 @@ class HotelLoginOtp(APIView):
 
 @permission_classes([IsAuthenticated])
 class HotelAccountLogin(APIView):
+
+    @swagger_auto_schema(
+        tags=["Hotel Authentication"],
+        operation_description="Verifying Hotel Login OTP",
+        responses={
+            200:OtpSerializer,
+            400:"errors"
+        }
+    )
     def post(self,request):
         serializer = OtpSerializer(data=request.data)
         if serializer.is_valid():
@@ -189,6 +246,15 @@ class HotelAccountLogin(APIView):
 @authentication_classes([AuthenticateHotel])
 @permission_classes([IsAuthenticated])  
 class HotelPhoneOtp(APIView):
+
+    @swagger_auto_schema(
+        tags=["Hotel Authentication"],
+        operation_description="Verifying Hotel Phone number Sending otp using twilio",
+        responses={
+            200:"Okay",
+            400:"errors"
+        }
+    )
     def post(self,request):
         hotel_email = request.auth
         if hotel_email:
@@ -204,6 +270,15 @@ class HotelPhoneOtp(APIView):
 @authentication_classes([AuthenticateHotel])
 @permission_classes([IsAuthenticated])
 class FoodmenuView(APIView):
+
+    @swagger_auto_schema(
+        tags=["Hotel Food Menu"],
+        operation_description="Adding Food items ",
+        responses={
+            200:FoodmenuSerializer,
+            400:"errors"
+        }
+    )
     def post(self,request):
         hotel_email = request.auth
         if hotel_email:
@@ -226,6 +301,14 @@ class FoodmenuView(APIView):
         return Response({'msg':'You are not logined'},status=status.HTTP_400_BAD_REQUEST)
     
 
+    @swagger_auto_schema(
+        tags=["Hotel Food Menu"],
+        operation_description="Updating Food items",
+        responses={
+            200:FoodmenuSerializer,
+            400:"errors"
+        }
+    )
     def patch(self,request):
         hotel_email = request.auth
         if hotel_email:
@@ -248,7 +331,14 @@ class FoodmenuView(APIView):
         return Response({'msg':'something wrooong'},status=status.HTTP_400_BAD_REQUEST)
     
 
-
+    @swagger_auto_schema(
+        tags=["Hotel Food Menu"],
+        operation_description="Searching Food Items, Getting all items",
+        responses={
+            200:FoodmenuSerializer,
+            400:"errors"
+        }
+    )
     def get(self,request):
         hotel_email = request.auth
         hotel = HotelsAccount.objects.get(email=hotel_email)

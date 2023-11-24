@@ -10,14 +10,21 @@ from user_panel.serializers import UserSerilaizer
 from hotel_panel.serializer import HotelAccountSeriallizer
 from django.db.models import Q
 from .pagination import CustomUserListPagination
-# from rest_framework.pagination import LimitOffsetPagination,PageNumberPagination
+from drf_yasg.utils import swagger_auto_schema
 
 
 
 @permission_classes([IsAdminUser,IsAuthenticated])
 class AdminHotelManage(APIView):
-    # pagination_class = CustomUserListPagination
-
+    
+    @swagger_auto_schema(
+        tags=["Admin panel"],
+        operation_description="Approving Hotels By Admin",
+        responses={
+            200:"Okay",
+            400:"errors"
+        }
+    )
     def post(self,request):
         hotel_email = request.data.get('hotel_email')
         try:
@@ -27,20 +34,68 @@ class AdminHotelManage(APIView):
         except Exception as e:
             return Response({'msg':'no hotel with this mail'},status=status.HTTP_400_BAD_REQUEST)
     
+
+
+    @swagger_auto_schema(
+        tags=["Admin panel"],
+        operation_description="Listing All Unapproved Hotels",
+        responses={
+            200:HotelAccountSeriallizer,
+            400:"errors"
+        }
+    )
     def get(self,request):
-        data = request.data.get('data')
-        print(data)
-        if data == 'users':
-            res = self.get_users(request)
-        if data == 'hotels':
-            res = self.get_hotels()
-        if data == 'unapproved_hotels':
-            res = self.get_unApprovedHotels()
-        if res['status']=='ok':
-            return Response(res,status=status.HTTP_200_OK)
-        return Response(res,status=status.HTTP_400_BAD_REQUEST) 
-    
-    def get_users(self,request):
+        hotels = HotelsAccount.objects.filter(
+            Q(is_active=True) & 
+            Q(is_approved = False)
+            )
+        try:
+            serializer = HotelAccountSeriallizer(hotels,many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'msg':"Error While Serializing"},status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+@permission_classes([IsAdminUser,IsAuthenticated])
+class AdminPanelApprovedHotels(APIView):
+
+    @swagger_auto_schema(
+        tags=["Admin panel"],
+        operation_description="Listing All Approved Hotels",
+        responses={
+            200:HotelAccountSeriallizer,
+            400:"errors"
+        }
+    )
+    def get(self,request):
+        hotels = HotelsAccount.objects.filter(
+            Q(is_active=True) & 
+            Q(is_approved = True)
+            )
+        try:
+            serializer = HotelAccountSeriallizer(hotels,many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"msg":"Somthing Wrong while serialising"},status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+@permission_classes([IsAdminUser,IsAuthenticated])
+class AdminPanelUsersList(APIView):
+
+    @swagger_auto_schema(
+        tags=["Admin panel"],
+        operation_description="Listing All Users",
+        responses={
+            200:UserSerilaizer,
+            400:"errors"
+        }
+    )
+    def get(self,request):
         users = MyUser.objects.all()
         try:
             count_users = len(users)
@@ -48,33 +103,10 @@ class AdminHotelManage(APIView):
             count_pages = count_users // pagination.page_size
             result_page = pagination.paginate_queryset(users,request)
             serializer = UserSerilaizer(result_page,many=True)
-            return {'data':serializer.data,'page_count':count_pages,'status':'ok'}
+            return Response({'data':serializer.data,'page_count':count_pages},status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
-            return {'data':"Somthing Wrong while serialising",'status':'error'}
-        
-    def get_hotels(self):
-        hotels = HotelsAccount.objects.filter(
-            Q(is_active=True) & 
-            Q(is_approved = True)
-            )
-        try:
-            serializer = HotelAccountSeriallizer(hotels,many=True)
-            return {'data':serializer.data,'status':'ok'}
-        except Exception as e:
-            return {'data':"Somthing Wrong while serialising",'status':'error'}
-        
-    def get_unApprovedHotels(self):
-        hotels = HotelsAccount.objects.filter(
-            Q(is_active=True) & 
-            Q(is_approved = False)
-            )
-        try:
-            serializer = HotelAccountSeriallizer(hotels,many=True)
-            return {'data':serializer.data,'status':'ok'}
-        except Exception as e:
-            return {'data':"Somthing Wrong while serialising",'status':'error'}
-
+            return Response({'msg':'Errors While Serializing'},status=status.HTTP_400_BAD_REQUEST)
 
 
 # Create your views here.

@@ -11,6 +11,8 @@ import random
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 import base64
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 def get_tokens_for_user(user,**kwargs):
@@ -27,6 +29,16 @@ def get_tokens_for_user(user,**kwargs):
 
 class GoogleAuth(GenericAPIView):
     serializer_class = GoogleAuthSerializer
+
+    @swagger_auto_schema(
+        tags=["Authentication"],
+        operation_description="Register of user using Google Authentication",
+        responses={
+            200:GoogleAuthSerializer,
+            400:"errors"
+        }
+    )
+
     def post(self,request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception = True )
@@ -36,6 +48,16 @@ class GoogleAuth(GenericAPIView):
 
 
 class RegisterWithEmail(APIView):
+
+    @swagger_auto_schema(
+        tags=["Authentication"],
+        operation_description="Register of user using email",
+        responses={
+            200:MyuserEmailSerializer,
+            400:"errors"
+        }
+    )
+
     def post(self,request):
         serializer = MyuserEmailSerializer(data=request.data)
         if serializer.is_valid():
@@ -51,6 +73,16 @@ class RegisterWithEmail(APIView):
 
 
 class LoginWithOtp(APIView):
+
+    @swagger_auto_schema(
+        tags=["Authentication"],
+        operation_description="Login using the OTP",
+        responses={
+            200:OtpSerializer,
+            400:"errors"
+        }
+    )
+
     def post(self,request):
         serializer = OtpSerializer(data=request.data)
         print(request.data)
@@ -79,6 +111,15 @@ class LoginWithOtp(APIView):
 
 @permission_classes([IsAuthenticated])
 class VerifyMobileNumber(APIView):
+
+    @swagger_auto_schema(
+        tags=["Phone Number Verification"],
+        operation_description="Sending OTP through twilio",
+        responses={
+            200:OtpSerializer,
+            400:"errors"
+        }
+    )
     def post(self,request):
         print(request.data)
         serilaizer = MyuserPhoneSerializer(data=request.data)
@@ -95,6 +136,16 @@ class VerifyMobileNumber(APIView):
 
 @permission_classes([IsAuthenticated])
 class VerifyPhoneOtp(APIView):
+
+    @swagger_auto_schema(
+        tags=["Phone Number Verification"],
+        operation_description="Verifying Twilio OTP",
+        responses={
+            200:OtpSerializer,
+            400:"errors"
+        }
+    )
+    
     def post(self,request):
         otp = request.data.get('otp')
         hashed_otp = request.data.get('v_id')

@@ -10,11 +10,20 @@ from accounts.models import MyUser,UserProfile
 from ipware import get_client_ip
 import json, urllib
 from decouple import config
+from drf_yasg.utils import swagger_auto_schema
 
 
 class UserCurrentLocation(APIView):
+
+    @swagger_auto_schema(
+        tags=["Current Location"],
+        operation_description="Getting location of user using client ip",
+        responses={
+            200:"okay",
+            400:"errors"
+        }
+    )
     def post(self,request):
-        print('haaaaaaaaaaaaaaaa')
         client_ip, is_routable = get_client_ip(request)
         if is_routable:
             ip_type = 'public'
@@ -33,12 +42,30 @@ class UserCurrentLocation(APIView):
 
 @permission_classes([IsAuthenticated])
 class ProfileManage(APIView):
+
+    @swagger_auto_schema(
+        tags=["User Profile"],
+        operation_description="User profile getting",
+        responses={
+            200:UserSerilaizer,
+            400:"errors"
+        }
+    )
     def get(self,request):
         currentuser = request.user
         user = MyUser.objects.get(id=currentuser.id)
         serializer = UserSerilaizer(user)
         return Response({'data':serializer.data},status=status.HTTP_200_OK)
     
+
+    @swagger_auto_schema(
+        tags=["User Profile"],
+        operation_description="User profile Updating",
+        responses={
+            200:UserSerilaizer,
+            400:"errors"
+        }
+    )
     def patch(self,request):
         user = request.user
         try:
@@ -59,6 +86,14 @@ class ProfileManage(APIView):
             return Response({'msg':'something wrong...'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+    @swagger_auto_schema(
+        tags=["User Profile"],
+        operation_description="User profile Deleting",
+        responses={
+            200:"Okay",
+            400:"errors"
+        }
+    )
     def delete(self,request):
         user = request.user
         user.delete()

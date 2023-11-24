@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'rest_framework',
     'rest_framework_gis',
+    'drf_yasg',
     'accounts',
     'user_panel',
     'hotel_panel',
@@ -232,3 +233,18 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # address of my React app
 ]
 CORS_ALLOW_ALL_ORIGINS = True 
+
+
+
+#swagger
+SWAGGER_SETTINGS = {
+    "TITLE": "cinemaTicketBooking",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SECURITY_DEFINITIONS":{
+        'Bearer': {
+            'in': 'header',
+            'name': 'Authorization',
+            'type': 'apiKey',
+        },
+    }
+}
