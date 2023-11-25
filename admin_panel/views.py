@@ -31,6 +31,7 @@ class AdminHotelManage(APIView):
             hotel = HotelsAccount.objects.get(email = hotel_email)
             hotel.is_approved = True
             hotel.save()
+            return Response({'msg':'Successfully done'},status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'msg':'no hotel with this mail'},status=status.HTTP_400_BAD_REQUEST)
     

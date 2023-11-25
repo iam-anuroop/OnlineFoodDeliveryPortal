@@ -186,17 +186,11 @@ class HotelLoginOtp(APIView):
     def post(self,request):
         try:
             owner = HotelOwner.objects.get(user=request.user)
-            # serializer = EmailSeriaizer(data=request.data)
-            # if serializer.is_valid():
-                # hotel_email = serializer.validated_data.get('email')
-                # print(hotel_email)
             hotel_id = request.data.get('hotel_id')
             hotel = HotelsAccount.objects.get(id=hotel_id,owner=owner)
             email = hotel.email
             subject = "Hungry hub code for Login"
             otp=random.randint(100000,999999)
-            # request.session['otp']=otp
-            # request.session['email']=email
             message = f"Your code for login is = {otp}"
             send_email(email=email,subject=subject,message=message)
             otp=str(otp)

@@ -22,11 +22,10 @@ class EmailSeriaizer(serializers.Serializer):
 
 
 class HotelAccountSeriallizer(serializers.ModelSerializer):
+    owner = OwnerSerializer()
     class Meta:
         model = HotelsAccount
         exclude = [
-            'owner',
-            'is_approved',
             'is_active'
             ]
 

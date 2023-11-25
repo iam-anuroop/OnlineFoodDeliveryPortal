@@ -59,6 +59,7 @@ class RegisterWithEmail(APIView):
     )
 
     def post(self,request):
+        print('hoyyaaa')
         serializer = MyuserEmailSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
