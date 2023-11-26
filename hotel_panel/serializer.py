@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import HotelsAccount,HotelOwner,FoodMenu
-
+import cloudinary
 
 
 
@@ -30,18 +30,26 @@ class HotelAccountSeriallizer(serializers.ModelSerializer):
             ]
 
 
-class FoodmenuSerializer(serializers.ModelSerializer):
+class FoodPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = FoodMenu
         fields = [
             'id',
             'food_name',
             'food_type',
-            'food_image',
             'food_price',
             'offer_price',
             'description',
             'is_veg',
             'is_available'
+        ]  
+
+
+class FoodmenuSerializer(serializers.ModelSerializer):
+    hotel = HotelAccountSeriallizer()
+    class Meta:
+        model = FoodMenu
+        exclude = [
+            'is_veg'
         ]  
 

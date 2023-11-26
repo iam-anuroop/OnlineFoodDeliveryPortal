@@ -5,7 +5,8 @@ from rest_framework.views import APIView
 from .serializer import (
     OwnerSerializer,
     HotelAccountSeriallizer,
-    EmailSeriaizer,FoodmenuSerializer
+    FoodmenuSerializer,
+    FoodPostSerializer
 ) 
 from accounts.views import get_tokens_for_user
 from accounts.utils import send_email,send_phone,verify_user_code
@@ -19,6 +20,7 @@ from .customauth import AuthenticateHotel
 import base64
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
+from cloudinary import uploader
 
 
 
@@ -277,19 +279,22 @@ class FoodmenuView(APIView):
         hotel_email = request.auth
         if hotel_email:
             hotel = HotelsAccount.objects.get(email=hotel_email)
-            serializer = FoodmenuSerializer(data=request.data)
+            food_image = request.data.get('food_image')
+            res = uploader.upload(food_image)
+            serializer = FoodPostSerializer(data=request.data)
             if serializer.is_valid():
-                food = FoodMenu.objects.create(
+                FoodMenu.objects.create(
+                    hotel = hotel,
                     food_name = serializer.validated_data.get('food_name'),
                     food_type = serializer.validated_data.get('food_type'),
-                    food_image = serializer.validated_data.get('food_image'),
+                    food_image = res['url'],
                     food_price = serializer.validated_data.get('food_price'),
+                    offer_price = serializer.validated_data.get('offer_price'),
                     description = serializer.validated_data.get('description'),
                     is_veg = serializer.validated_data.get('is_veg')
                 )
-                food.hotel = hotel
-                food.save()
                 return Response({'msg':'food item added'},status=status.HTTP_200_OK)
+            print(serializer.errors)
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'msg':'You are not logined'},status=status.HTTP_400_BAD_REQUEST)
@@ -355,42 +360,4 @@ class FoodmenuView(APIView):
 
 
 
-# Create your views here.
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # Theatre patch
-
-    # def patch(self,request):
-    #     try:
-    #         owner = HotelOwner.objects.get(user=request.user)
-    #         hotel = HotelsAccount.objects.get(owner=owner)
-    #         serializer = HotelAccountSeriallizer(HotelsAccount,request.data,partial=True)
-    #         if serializer.is_valid():
-    #             email = serializer.validated_data.get('email')
-    #             phone = serializer.validated_data.get('contact')
-    #             message = "Updated Your Hotel profile."
-    #             subject = "Hungry hub ."
-    #             send_email(message=message,subject=subject,email=email)
-    #             if hotel.contact != phone:
-    #                 hotel.is_active = False
-    #                 hashed_otp = send_phone(phone)
-    #                 request.session['hashed_otp'] = hashed_otp
-    #                 request.session['phone'] = phone
-    #                 hotel.save()
-    #             serializer.save()
-    #             # please verify your phone alert while changing the phone number
-    #             return Response(serializer.data,status=status.HTTP_200_OK)
-    #         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    #     except:
-    #         return Response({'Register owner form first...'},status=status.HTTP_400_BAD_REQUEST)
+# Create your views heere

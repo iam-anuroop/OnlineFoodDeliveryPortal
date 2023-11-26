@@ -11,7 +11,7 @@ from hotel_panel.serializer import HotelAccountSeriallizer
 from django.db.models import Q
 from .pagination import CustomUserListPagination
 from drf_yasg.utils import swagger_auto_schema
-
+from accounts.utils import send_email
 
 
 @permission_classes([IsAdminUser,IsAuthenticated])
@@ -31,6 +31,9 @@ class AdminHotelManage(APIView):
             hotel = HotelsAccount.objects.get(email = hotel_email)
             hotel.is_approved = True
             hotel.save()
+            subject = "Buisiness Approved"
+            message = "Your Account has been verified and approved successfully"
+            send_email(email=hotel_email,subject=subject,message=message)
             return Response({'msg':'Successfully done'},status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'msg':'no hotel with this mail'},status=status.HTTP_400_BAD_REQUEST)
@@ -77,8 +80,12 @@ class AdminPanelApprovedHotels(APIView):
             Q(is_approved = True)
             )
         try:
-            serializer = HotelAccountSeriallizer(hotels,many=True)
-            return Response(serializer.data,status=status.HTTP_200_OK)
+            count_hotels = len(hotels)
+            pagination = CustomUserListPagination()
+            count_pages = [i for i in range(1,count_hotels // pagination.page_size +1)]
+            result_page = pagination.paginate_queryset(hotels,request)
+            serializer = HotelAccountSeriallizer(result_page,many=True)
+            return Response({'data':serializer.data,'page_count':count_pages},status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"msg":"Somthing Wrong while serialising"},status=status.HTTP_400_BAD_REQUEST)
 

@@ -15,7 +15,7 @@ admin.site.register(HotelOwner,MyOwnerAdmin)
 
 
 class HotelAccountAdmin(OSMGeoAdmin):
-    list_display = ('id','contact','email')
+    list_display = ('id','hotel_name','contact','email')
 admin.site.register(HotelsAccount,HotelAccountAdmin)
 
 
