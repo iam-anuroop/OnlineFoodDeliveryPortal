@@ -66,3 +66,4 @@ class UserProfile(models.Model):
     user_address = models.TextField(null=True,blank=True)
     alt_phone = models.CharField(null=True,blank=True)
     location = models.PointField(srid=4326,null=True,blank=True)
+    cart = models.JSONField(null=True,blank=True)

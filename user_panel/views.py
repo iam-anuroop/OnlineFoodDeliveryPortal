@@ -6,11 +6,18 @@ from .serializers import UserSerilaizer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from accounts.models import MyUser,UserProfile
+from accounts.models import (
+    MyUser ,
+    UserProfile
+    )
+from hotel_panel.models import FoodMenu
 from ipware import get_client_ip
 import json, urllib
 from decouple import config
 from drf_yasg.utils import swagger_auto_schema
+from django.db.models import F, Count ,Sum ,When ,IntegerField,Case
+import json
+
 
 
 class UserCurrentLocation(APIView):
@@ -72,7 +79,6 @@ class ProfileManage(APIView):
             profile = UserProfile.objects.get(user=user)
             if profile:
                 serializer = UserSerilaizer(user, data=request.data, partial=True)
-                print(request.data)
                 if serializer.is_valid():
                     serializer.save()
                     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
@@ -98,5 +104,60 @@ class ProfileManage(APIView):
         user = request.user
         user.delete()
         return Response({'msg':'Account deleted...'},status=status.HTTP_200_OK)
+
+
+
+
+
+
+@permission_classes([IsAuthenticated])
+class AddToCart(APIView):
+    def post(self, request):
+        try:
+            cart = request.data.get('cart')
+            profile = UserProfile.objects.get(user=request.user)
+
+            if len(cart[0]) == 1:
+                key = list(cart[0].keys())[0]
+                if profile.cart[0].get(key) is not None:
+                    profile.cart[0][key] = profile.cart[0][key] + 1
+                else:
+                    profile.cart[0][key] = 1
+            else:
+                profile.cart = cart
+            profile.save()
+            return Response({"msg": "ok"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"msg":"error while add to cart"},status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+    @permission_classes([IsAuthenticated])
+    def get(self,request):
+        try:
+            profile = UserProfile.objects.get(user=request.user)
+            cart_items = profile.cart[0]
+            food_item_ids = list(cart_items.keys())
+            food_item_counts = list(cart_items.values())
+            cart_food_items = FoodMenu.objects.filter(id__in=food_item_ids)
+
+
+            cart_food_items = cart_food_items.annotate(
+                cart_item_count=Case(
+                    *[When(id=item_id, then=count) for item_id, count in zip(food_item_ids,food_item_counts)],
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ).values()
+            print('helloo')
+            # x=json.dumps(cart_food_items)
+            return Response(cart_food_items)
+        except Exception as e:
+            return Response({'hi':'error'})
+
+        
+
+
+
 
 # Create your views here.
