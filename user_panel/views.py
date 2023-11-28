@@ -10,7 +10,11 @@ from accounts.models import (
     MyUser ,
     UserProfile
     )
+from user_panel.serializers import (
+    UserProfileSerializer
+)
 from hotel_panel.models import FoodMenu
+from hotel_panel.serializer import FoodmenuSerializer
 from ipware import get_client_ip
 import json, urllib
 from decouple import config
@@ -136,24 +140,24 @@ class AddToCart(APIView):
     def get(self,request):
         try:
             profile = UserProfile.objects.get(user=request.user)
+            serializer = UserProfileSerializer(profile)
             cart_items = profile.cart[0]
             food_item_ids = list(cart_items.keys())
             food_item_counts = list(cart_items.values())
-            cart_food_items = FoodMenu.objects.filter(id__in=food_item_ids)
-
-
-            cart_food_items = cart_food_items.annotate(
+            # cart_food_items = FoodMenu.objects.filter(id__in=food_item_ids)
+            cart_food_items = FoodMenu.objects.filter(
+                id__in=food_item_ids).annotate(
                 cart_item_count=Case(
                     *[When(id=item_id, then=count) for item_id, count in zip(food_item_ids,food_item_counts)],
                     default=0,
                     output_field=IntegerField()
                 )
             ).values()
-            print('helloo')
-            # x=json.dumps(cart_food_items)
-            return Response(cart_food_items)
+
+            # serializer = FoodmenuSerializer(cart_food_items,many=True)
+            return Response({'cart_food_items':cart_food_items,'profile':serializer.data},status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({'hi':'error'})
+            return Response({'msg':'Something '},status=status.HTTP_400_BAD_REQUEST)
 
         
 

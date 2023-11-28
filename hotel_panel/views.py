@@ -97,6 +97,7 @@ class HotelAccountRegister(APIView):
                     hotel_name = serializer.validated_data.get('hotel_name'),
                     description = serializer.validated_data.get('description'),
                     certificate = serializer.validated_data.get('certificate'),
+                    profile_photo = serializer.validated_data.get('profile_photo'),
                     contact = phone,
                     alt_contact = serializer.validated_data.get('alt_contact'),
                     address = serializer.validated_data.get('address'),

@@ -16,6 +16,7 @@ class HotelOwner(models.Model):
 class HotelsAccount(models.Model):
     owner = models.ForeignKey(HotelOwner,on_delete=models.PROTECT,related_name='hotelaccount',null=True,blank=True)
     hotel_name = models.CharField(max_length=255)
+    profile_photo = models.FileField(upload_to='hotel_profile',null=True,blank=True)
     description = models.TextField()
     contact = models.CharField(max_length=100)
     alt_contact = models.CharField(max_length=100)

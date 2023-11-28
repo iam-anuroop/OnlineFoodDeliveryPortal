@@ -10,6 +10,7 @@ class UserProfileSerializer(GeoFeatureModelSerializer):
         geo_field = 'location'
         fields = [
             'user_address',
+            'office_address',
             'alt_phone',
             'location'
         ]
