@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.fields import empty
-from .models import MyUser
+from .models import MyUser,SavedLocations
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from decouple import config
@@ -61,4 +61,17 @@ class MyuserPhoneSerializer(serializers.Serializer):
 
 class OtpSerializer(serializers.Serializer):
     otp = serializers.IntegerField()
+
+
+class SavedLocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SavedLocations
+        fields = [
+            'city',
+            'district',
+            'state',
+            'country',
+            'location'
+            ]
+
     

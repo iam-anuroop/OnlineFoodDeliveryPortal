@@ -27,7 +27,7 @@ class HotelsAccount(models.Model):
     state = models.CharField(max_length=100,null=True,blank=True)
     city = models.CharField(max_length=100,null=True,blank=True)
     location = models.PointField(srid=4326,null=True,blank=True)
-    rating = models.FloatField(null=True,blank=True)
+    rating = models.FloatField(null=True,blank=True,default=0.0)
 
     is_active = models.BooleanField(default=False)
     is_logined = models.BooleanField(default=False)

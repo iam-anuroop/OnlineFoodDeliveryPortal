@@ -8,7 +8,8 @@ from rest_framework.views import APIView
 from rest_framework import status
 from accounts.models import (
     MyUser ,
-    UserProfile
+    UserProfile,
+    SavedLocations
     )
 from user_panel.serializers import (
     UserProfileSerializer
@@ -19,8 +20,9 @@ from ipware import get_client_ip
 import json, urllib
 from decouple import config
 from drf_yasg.utils import swagger_auto_schema
-from django.db.models import F, Count ,Sum ,When ,IntegerField,Case
+from django.db.models import Q ,F, Count ,Sum ,When ,IntegerField,Case
 import json
+from django.contrib.gis.geos import Point
 
 
 
@@ -47,6 +49,22 @@ class UserCurrentLocation(APIView):
         data1 = json.loads(resp.read())
         data1['client_ip'] = client_ip
         data1['ip_type'] = ip_type
+
+        if Q(data1['country']) & Q(data1['city']) & Q(data1['region']) & Q(data1['county']):
+            location = Point(data1['longitude'], data1['latitude'], srid=4326)
+
+            if not SavedLocations.objects.filter(Q(country = data1['country']) & 
+                                                 Q(city = data1['city']) & 
+                                                 Q(state = data1['region']) & 
+                                                 Q(district = data1['county'])).exists():
+                
+                SavedLocations.objects.create(
+                    country = data1['country'],
+                    state = data1['region'],
+                    district = data1['county'],
+                    city = data1['city'],
+                    location = location
+                )
         return Response(data1,status=status.HTTP_200_OK)
 
 

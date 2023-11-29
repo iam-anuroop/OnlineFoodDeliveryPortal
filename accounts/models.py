@@ -68,3 +68,11 @@ class UserProfile(models.Model):
     alt_phone = models.CharField(null=True,blank=True)
     location = models.PointField(srid=4326,null=True,blank=True)
     cart = models.JSONField(null=True,blank=True)
+
+
+class SavedLocations(models.Model):
+    city = models.CharField(max_length=255,null=True,blank=True)
+    district = models.CharField(max_length=255,null=True,blank=True)
+    state = models.CharField(max_length=255,null=True,blank=True)
+    country = models.CharField(max_length=255,null=True,blank=True)
+    location = models.PointField(srid=4326,null=True,blank=True)
