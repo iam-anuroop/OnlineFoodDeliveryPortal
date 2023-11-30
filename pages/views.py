@@ -15,7 +15,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
-from django.contrib.gis.measure import D 
+from django.contrib.gis.measure import D
 from accounts.models import SavedLocations
 from accounts.serializers import SavedLocationSerializer
 
@@ -60,7 +60,6 @@ class FilterNearHotels(APIView):
 
 class SearchLocation(APIView):
     def get(self,request):
-        print('kkjkkk')
         q = request.GET.get('q')
         if q:
             queryset = SavedLocations.objects.filter(

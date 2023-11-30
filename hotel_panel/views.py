@@ -90,6 +90,7 @@ class HotelAccountRegister(APIView):
         # print(serializer)
         if serializer.is_valid():
             try:
+                # change here TODO
                 owner = HotelOwner.objects.get(user=request.user)
                 email = serializer.validated_data.get('email')
                 phone = serializer.validated_data.get('contact')
@@ -108,7 +109,7 @@ class HotelAccountRegister(APIView):
                 subject = "Hungry hub notification"
                 send_email(message=message,subject=subject,email=email)
                 hashed_otp = send_phone(phone)
-                hotel.owner = owner
+                hotel.owner = owner   
                 hotel.save()
                 return Response({'msg':'Registration request successfull...',
                                  'vid':hashed_otp,'phone':phone},status=status.HTTP_200_OK)
@@ -145,6 +146,7 @@ class VerifyHotelPhone(APIView):
     @swagger_auto_schema(
         tags=["Hotel Authentication"],
         operation_description="Hotel phone otp verification",
+        request_body= OtpSerializer,
         responses={
             200:OtpSerializer,
             400:"errors"
@@ -152,7 +154,7 @@ class VerifyHotelPhone(APIView):
     )
     def post(self,request):
         serializer = OtpSerializer(data=request.data)
-        hashed_otp = request.data.get('vid')
+        hashed_otp = request.data.get('vid')   #TODO
         phone = request.data.get('phone')
         if serializer.is_valid():
             otp = serializer.validated_data.get('otp')
@@ -276,6 +278,7 @@ class FoodmenuView(APIView):
             400:"errors"
         }
     )
+    
     def post(self,request):
         hotel_email = request.auth
         if hotel_email:
@@ -356,6 +359,22 @@ class FoodmenuView(APIView):
             
 
 
+
+@authentication_classes([AuthenticateHotel])
+@permission_classes([IsAuthenticated])
+class HotelProfileView(APIView):
+
+    def get(self,request):
+        print('blaaaaaaaaaaah')
+        print(request.GET.get('id'),'kkkkkkkkk')
+        try:
+            hotel = HotelsAccount.objects.get(id=request.GET.get('id'))
+        except:
+            return Response({'msg':'Something wrong while getting this hotel'}
+                            ,status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = HotelAccountSeriallizer(hotel)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 
 

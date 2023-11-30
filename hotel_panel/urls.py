@@ -6,7 +6,8 @@ from .views import (
     HotelAccountLogin,
     HotelLoginOtp,
     FoodmenuView,
-    HotelPhoneOtp
+    HotelPhoneOtp,
+    HotelProfileView
                     )
 
 urlpatterns = [
@@ -16,5 +17,6 @@ urlpatterns = [
     path('hotelotp/',HotelLoginOtp.as_view(),name='hotelotp'),
     path('hotellogin/',HotelAccountLogin.as_view(),name='hotellogin'),
     path('hotelphoneotp/',HotelPhoneOtp.as_view(),name='hotelphoneotp'),
+    path('hotelprofile/',HotelProfileView.as_view(),name='hotelprofile'),
     path('food/',FoodmenuView.as_view(),name='food'),
 ]

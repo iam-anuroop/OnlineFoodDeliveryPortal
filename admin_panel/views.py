@@ -82,7 +82,9 @@ class AdminPanelApprovedHotels(APIView):
         try:
             count_hotels = len(hotels)
             pagination = CustomUserListPagination()
-            count_pages = [i for i in range(1,count_hotels // pagination.page_size +1)]
+            count_pages = [i for i in range(1,(count_hotels // pagination.page_size)+1)]
+            if count_hotels // pagination.page_size != 0:
+                count_pages = [i for i in range(1,(count_hotels // pagination.page_size)+2)]
             result_page = pagination.paginate_queryset(hotels,request)
             serializer = HotelAccountSeriallizer(result_page,many=True)
             return Response({'data':serializer.data,'page_count':count_pages},status=status.HTTP_200_OK)

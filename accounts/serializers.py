@@ -60,7 +60,9 @@ class MyuserPhoneSerializer(serializers.Serializer):
 
 
 class OtpSerializer(serializers.Serializer):
-    otp = serializers.IntegerField()
+    otp = serializers.IntegerField(required=True)
+    # phone = serializers.CharField()
+
 
 
 class SavedLocationSerializer(serializers.ModelSerializer):
