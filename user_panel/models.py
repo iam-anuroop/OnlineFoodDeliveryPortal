@@ -3,7 +3,8 @@ from hotel_panel.models import FoodMenu
 from accounts.models import MyUser
 
 
-# class Shopping(models.Model):
-#     user = models.ForeignKey(MyUser,on_delete=models.PROTECT)
+class Shopping(models.Model):
+    user = models.ForeignKey(MyUser,on_delete=models.PROTECT)
+    total_amount = models.FloatField()
 
 # Create your models here.
