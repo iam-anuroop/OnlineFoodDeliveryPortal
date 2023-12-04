@@ -377,19 +377,6 @@ class HotelProfileView(APIView):
 
 
 
-class HotelSearch(APIView):
-    def get(self,request):
-        query = request.GET.get('q')
-        if query:
-            hotels = HotelsAccount.objects.filter(
-                Q(hotel_name__icontains=query) |
-                Q(email__icontains=query)
-                )
-            serializer = HotelAccountSeriallizer(hotels,many=True)
-        else:
-            return Response({'msg':'No hotels available'},status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-            
 
 
 

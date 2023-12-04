@@ -70,6 +70,7 @@ class UserProfile(models.Model):
     cart = models.JSONField(null=True,blank=True)
 
 
+
 class SavedLocations(models.Model):
     city = models.CharField(max_length=255,null=True,blank=True)
     district = models.CharField(max_length=255,null=True,blank=True)

@@ -8,7 +8,6 @@ from .views import (
     FoodmenuView,
     HotelPhoneOtp,
     HotelProfileView,
-    HotelSearch
                     )
 
 urlpatterns = [
@@ -19,6 +18,5 @@ urlpatterns = [
     path('hotellogin/',HotelAccountLogin.as_view(),name='hotellogin'),
     path('hotelphoneotp/',HotelPhoneOtp.as_view(),name='hotelphoneotp'),
     path('hotelprofile/',HotelProfileView.as_view(),name='hotelprofile'),
-    path('hotelsearch/',HotelSearch.as_view(),name='hotelsearch'),
     path('food/',FoodmenuView.as_view(),name='food'),
 ]
