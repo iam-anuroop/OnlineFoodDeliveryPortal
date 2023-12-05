@@ -119,20 +119,54 @@ class ProfileManage(APIView):
 class AddToCart(APIView):
     def post(self, request):
         try:
+            hotel = str(request.data.get("hotel"))
+            item = str(request.data.get("item"))
+            count = request.data.get("count")
             cart = request.data.get("cart")
+            print(hotel,item,count)
             profile = UserProfile.objects.get(user=request.user)
 
-            if len(cart[0]) == 1:
-                key = list(cart[0].keys())[0]
-                if profile.cart[0].get(key) is not None:
-                    profile.cart[0][key] = profile.cart[0][key] + 1
-                else:
-                    profile.cart[0][key] = 1
+            if cart is not None:
+                x = [{hotel:cart}]
+                profile.cart = x
+                profile.save()
             else:
-                profile.cart = cart
+                if profile.cart is not None:
+                    try:
+                        if profile.cart[0][hotel]:
+                            if profile.cart[0][hotel][0][item]:
+                                profile.cart[0][hotel][0][item]=int(profile.cart[0][hotel][0][item])+int(count)
+                                if int(profile.cart[0][hotel][0][item])<1:
+                                    del profile.cart[0][hotel][0][item]
+                                if len(profile.cart[0][hotel][0])<1:
+                                    profile.cart=None
+                            else:
+                                profile.cart[0][hotel][0][item]=1
+                        else:
+                            if len(profile.cart[0])>0:
+                                x = [{hotel:[{item:1}]}]
+                                profile.cart = x
+                    except:
+                            x = [{hotel:[{item:1}]}]
+                            profile.cart = x
+                else:
+                    x = [{hotel:[{item:1}]}]
+                    profile.cart = x
+
             profile.save()
-            return Response({"msg": "ok"}, status=status.HTTP_200_OK)
+
+            return Response({'msg':'cart updated'},status=status.HTTP_200_OK)
+
+            # if len(cart[0]) == 1:
+            #     key = list(cart[0].keys())[0]
+            #     if profile.cart[0].get(key) is not None:
+            #         profile.cart[0][key] = profile.cart[0][key] + 1
+            #     else:
+            #         profile.cart[0][key] = 1
+            # else:
+            #     profile.cart = cart
         except Exception as e:
+            print(e,'lllll')
             return Response(
                 {"msg": "error while add to cart"}, status=status.HTTP_400_BAD_REQUEST
             )
