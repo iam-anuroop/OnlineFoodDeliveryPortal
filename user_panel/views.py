@@ -156,15 +156,6 @@ class AddToCart(APIView):
             profile.save()
 
             return Response({'msg':'cart updated'},status=status.HTTP_200_OK)
-
-            # if len(cart[0]) == 1:
-            #     key = list(cart[0].keys())[0]
-            #     if profile.cart[0].get(key) is not None:
-            #         profile.cart[0][key] = profile.cart[0][key] + 1
-            #     else:
-            #         profile.cart[0][key] = 1
-            # else:
-            #     profile.cart = cart
         except Exception as e:
             print(e,'lllll')
             return Response(
@@ -176,32 +167,38 @@ class AddToCart(APIView):
         try:
             profile = UserProfile.objects.get(user=request.user)
             serializer = UserProfileSerializer(profile)
-            cart_items = profile.cart[0]
-            food_item_ids = list(cart_items.keys())
-            food_item_counts = list(cart_items.values())
-            # cart_food_items = FoodMenu.objects.filter(id__in=food_item_ids)
-            cart_food_items = (
-                FoodMenu.objects.filter(id__in=food_item_ids)
-                .annotate(
-                    cart_item_count=Case(
-                        *[
-                            When(id=item_id, then=count)
-                            for item_id, count in zip(food_item_ids, food_item_counts)
-                        ],
-                        default=0,
-                        output_field=IntegerField()
-                    )
-                )
-                .values()
-            )
+            if profile.cart is not None:
 
-            # serializer = FoodmenuSerializer(cart_food_items,many=True)
-            return Response(
-                {"cart_food_items": cart_food_items, "profile": serializer.data},
-                status=status.HTTP_200_OK,
-            )
+                cart_items = profile.cart[0][list(profile.cart[0].keys())[0]][0]
+                food_item_ids = list(cart_items.keys())
+                food_item_counts = list(cart_items.values())
+                cart_food_items = (
+                    FoodMenu.objects.filter(id__in=food_item_ids)
+                    .annotate(
+                        cart_item_count=Case(
+                            *[
+                                When(id=item_id, then=count)
+                                for item_id, count in zip(food_item_ids, food_item_counts)
+                            ],
+                            default=0,
+                            output_field=IntegerField()
+                        )
+                    )
+                    .values()
+                )
+
+                # serializer = FoodmenuSerializer(cart_food_items,many=True)
+                return Response(
+                    {"cart_food_items": cart_food_items, "profile": serializer.data},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"cart_food_items": [], "profile": serializer.data},
+                    status=status.HTTP_200_OK,
+                )
         except Exception as e:
-            return Response({"msg": "Something "}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"msg": "Something wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Create your views here.
