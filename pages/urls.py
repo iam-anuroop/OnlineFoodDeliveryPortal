@@ -1,9 +1,9 @@
 from django.urls import path
 from .views import (
     FilterNearHotels,
-      SearchLocation,
-      FoodsOfSelectedHotel,
-      )
+    SearchLocation,
+    FoodsOfSelectedHotel,
+)
 
 
 urlpatterns = [

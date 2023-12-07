@@ -72,13 +72,13 @@ class FilterNearHotels(APIView):
 class FoodsOfSelectedHotel(APIView):
     def get(self, request):
         id = request.GET.get("id")
-        if Q(id) & Q(int(id)>0) :
+        if Q(id) & Q(int(id) > 0):
             print(HotelsAccount.objects.get(id=id))
             foods = FoodMenu.objects.filter(Q(hotel__id=id) & Q(is_available=True))
             print(foods)
             serializer = FoodmenuSerializer(foods, many=True)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        return Response({'msg':'No hotel with this id'})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"msg": "No hotel with this id"})
 
 
 # Create your views here.

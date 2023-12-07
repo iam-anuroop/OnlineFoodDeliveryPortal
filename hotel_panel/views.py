@@ -351,10 +351,7 @@ class FoodmenuView(APIView):
         return Response({"hotels": hotels, "query": query}, status=status.HTTP_200_OK)
 
 
-
-
-
-# profile view for hotel to see their details  
+# profile view for hotel to see their details
 @authentication_classes([AuthenticateHotel])
 @permission_classes([IsAuthenticated])
 class HotelProfileView(APIView):

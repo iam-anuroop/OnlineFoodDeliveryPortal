@@ -18,6 +18,7 @@ from drf_yasg.utils import swagger_auto_schema
 from django.db.models import Q, F, Count, Sum, When, IntegerField, Case
 import json
 from django.contrib.gis.geos import Point
+import stripe
 
 
 class UserCurrentLocation(APIView):
@@ -123,11 +124,10 @@ class AddToCart(APIView):
             item = str(request.data.get("item"))
             count = request.data.get("count")
             cart = request.data.get("cart")
-            print(hotel,item,count)
             profile = UserProfile.objects.get(user=request.user)
 
             if cart is not None:
-                x = [{hotel:cart}]
+                x = [{hotel: cart}]
                 profile.cart = x
                 profile.save()
             else:
@@ -135,29 +135,31 @@ class AddToCart(APIView):
                     try:
                         if profile.cart[0][hotel]:
                             if profile.cart[0][hotel][0][item]:
-                                profile.cart[0][hotel][0][item]=int(profile.cart[0][hotel][0][item])+int(count)
-                                if int(profile.cart[0][hotel][0][item])<1:
+                                profile.cart[0][hotel][0][item] = int(
+                                    profile.cart[0][hotel][0][item]
+                                ) + int(count)
+                                if int(profile.cart[0][hotel][0][item]) < 1:
                                     del profile.cart[0][hotel][0][item]
-                                if len(profile.cart[0][hotel][0])<1:
-                                    profile.cart=None
+                                if len(profile.cart[0][hotel][0]) < 1:
+                                    profile.cart = None
                             else:
-                                profile.cart[0][hotel][0][item]=1
+                                profile.cart[0][hotel][0][item] = 1
                         else:
-                            if len(profile.cart[0])>0:
-                                x = [{hotel:[{item:1}]}]
+                            if len(profile.cart[0]) > 0:
+                                x = [{hotel: [{item: 1}]}]
                                 profile.cart = x
                     except:
-                            x = [{hotel:[{item:1}]}]
-                            profile.cart = x
+                        x = [{hotel: [{item: 1}]}]
+                        profile.cart = x
                 else:
-                    x = [{hotel:[{item:1}]}]
+                    x = [{hotel: [{item: 1}]}]
                     profile.cart = x
 
             profile.save()
 
-            return Response({'msg':'cart updated'},status=status.HTTP_200_OK)
+            return Response({"msg": "cart updated"}, status=status.HTTP_200_OK)
         except Exception as e:
-            print(e,'lllll')
+            print(e, "lllll")
             return Response(
                 {"msg": "error while add to cart"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -168,7 +170,6 @@ class AddToCart(APIView):
             profile = UserProfile.objects.get(user=request.user)
             serializer = UserProfileSerializer(profile)
             if profile.cart is not None:
-
                 cart_items = profile.cart[0][list(profile.cart[0].keys())[0]][0]
                 food_item_ids = list(cart_items.keys())
                 food_item_counts = list(cart_items.values())
@@ -178,7 +179,9 @@ class AddToCart(APIView):
                         cart_item_count=Case(
                             *[
                                 When(id=item_id, then=count)
-                                for item_id, count in zip(food_item_ids, food_item_counts)
+                                for item_id, count in zip(
+                                    food_item_ids, food_item_counts
+                                )
                             ],
                             default=0,
                             output_field=IntegerField()
@@ -198,7 +201,27 @@ class AddToCart(APIView):
                     status=status.HTTP_200_OK,
                 )
         except Exception as e:
-            return Response({"msg": "Something wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"msg": "Something wrong"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class PaymentView(APIView):
+    def post(self, request):
+        stripe.api_key = config("STRIPE_CLIENT_SECRET")
+
+        intent = stripe.PaymentIntent.create(
+            amount=1000,
+            currency="inr",
+        )
+
+        client_secret = intent.client_secret
+        intent_id = intent.id
+        print(intent)
+        return Response(
+            {"client_secret": client_secret, "intentid": intent_id},
+            status=status.HTTP_200_OK,
+        )
 
 
 # Create your views here.
