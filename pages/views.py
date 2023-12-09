@@ -72,6 +72,7 @@ class FilterNearHotels(APIView):
 class FoodsOfSelectedHotel(APIView):
     def get(self, request):
         id = request.GET.get("id")
+        print(id)
         if Q(id) & Q(int(id) > 0):
             print(HotelsAccount.objects.get(id=id))
             foods = FoodMenu.objects.filter(Q(hotel__id=id) & Q(is_available=True))

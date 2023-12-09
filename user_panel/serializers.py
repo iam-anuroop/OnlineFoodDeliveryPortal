@@ -28,7 +28,6 @@ class UserSerilaizer(serializers.ModelSerializer):
             for attr, value in userprofile_data.items():
                 setattr(userprofile, attr, value)
             userprofile.save()
-
         return instance
 
     # def update(self, instance, validated_data):

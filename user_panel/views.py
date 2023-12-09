@@ -19,6 +19,8 @@ from django.db.models import Q, F, Count, Sum, When, IntegerField, Case
 import json
 from django.contrib.gis.geos import Point
 import stripe
+from django.conf import settings
+from django.shortcuts import redirect
 
 
 class UserCurrentLocation(APIView):
@@ -206,22 +208,29 @@ class AddToCart(APIView):
             )
 
 
+
+stripe.api_key = config('STRIPE_CLIENT_SECRET')
+@permission_classes([IsAuthenticated])
 class PaymentView(APIView):
-    def post(self, request):
-        stripe.api_key = config("STRIPE_CLIENT_SECRET")
-
-        intent = stripe.PaymentIntent.create(
-            amount=1000,
-            currency="inr",
-        )
-
-        client_secret = intent.client_secret
-        intent_id = intent.id
-        print(intent)
-        return Response(
-            {"client_secret": client_secret, "intentid": intent_id},
-            status=status.HTTP_200_OK,
-        )
+    def post(self,request):
+        try:
+            
+            checkout_session = stripe.checkout.Session.create(
+                line_items=[
+                    {
+                        'price': 'price_1OLLqMSGhzZ6Pyhpl5B4CUg5',
+                        'quantity': 1,
+                    },
+                ],
+                mode='payment',
+                success_url= 'http://localhost:5173/' + '?success=true&session_id={CHECKOUT_SESSION_ID}',
+                cancel_url= 'http://localhost:5173/' + '?canceled=true',
+            )
+            return redirect(checkout_session.url)
+        except Exception as e:
+            print(e)
+            return Response({'msg':'somthing went wrong on stripe'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # Create your views here.
