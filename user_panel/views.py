@@ -213,6 +213,7 @@ stripe.api_key = config('STRIPE_CLIENT_SECRET')
 @permission_classes([IsAuthenticated])
 class PaymentView(APIView):
     def post(self,request):
+        print(request.user)
         try:
             
             checkout_session = stripe.checkout.Session.create(
@@ -223,8 +224,8 @@ class PaymentView(APIView):
                     },
                 ],
                 mode='payment',
-                success_url= 'http://localhost:5173/' + '?success=true&session_id={CHECKOUT_SESSION_ID}',
-                cancel_url= 'http://localhost:5173/' + '?canceled=true',
+                success_url= settings.FRONT_URL + '?success=true&session_id={CHECKOUT_SESSION_ID}',
+                cancel_url= settings.FRONT_URL + '?canceled=true',
             )
             return redirect(checkout_session.url)
         except Exception as e:
