@@ -136,21 +136,23 @@ class AddToCart(APIView):
                 if profile.cart is not None:
                     try:
                         if profile.cart[0][hotel]:
-                            if profile.cart[0][hotel][0][item]:
-                                profile.cart[0][hotel][0][item] = int(
-                                    profile.cart[0][hotel][0][item]
-                                ) + int(count)
-                                if int(profile.cart[0][hotel][0][item]) < 1:
-                                    del profile.cart[0][hotel][0][item]
-                                if len(profile.cart[0][hotel][0]) < 1:
-                                    profile.cart = None
-                            else:
+                            try:
+                                if profile.cart[0][hotel][0][item]:
+                                    profile.cart[0][hotel][0][item] = int(
+                                        profile.cart[0][hotel][0][item]
+                                    ) + int(count)
+                                    if int(profile.cart[0][hotel][0][item]) < 1:
+                                        del profile.cart[0][hotel][0][item]
+                                    if len(profile.cart[0][hotel][0]) < 1:
+                                        profile.cart = None
+                            except:
                                 profile.cart[0][hotel][0][item] = 1
                         else:
                             if len(profile.cart[0]) > 0:
                                 x = [{hotel: [{item: 1}]}]
                                 profile.cart = x
                     except:
+                        print('iam here')
                         x = [{hotel: [{item: 1}]}]
                         profile.cart = x
                 else:
@@ -213,21 +215,58 @@ stripe.api_key = config('STRIPE_CLIENT_SECRET')
 @permission_classes([IsAuthenticated])
 class PaymentView(APIView):
     def post(self,request):
-        print(request.user)
+        profile = UserProfile.objects.get(user=request.user)
+        if profile.cart is not None:
+                cart_items = profile.cart[0][list(profile.cart[0].keys())[0]][0]
+                food_item_ids = list(cart_items.keys())
+                food_item_counts = list(cart_items.values())
+                cart_food_summery = (
+                        FoodMenu.objects
+                        .filter(id__in=food_item_ids)
+                        .annotate(cart_item_count=Case(
+                            *[When(id=item_id, then=count) for item_id, count in zip(food_item_ids, food_item_counts)],
+                            default=0,
+                            output_field=IntegerField()
+                        ))
+                        .aggregate(total_price=Sum(F('cart_item_count') * F('food_price'))
+                                   )
+                )
+                print(cart_food_summery['total_price'],'kkkkkkkkkkkk')    
+
+                data = stripe.Product.create(
+                    name = "Total amount",
+                    default_price_data={
+                        "unit_amount":int(cart_food_summery['total_price']*100),
+                        "currency":'inr'
+                    },
+                    expand=["default_price"],
+                )       
+
+                print(data.id)
+
+                customer = stripe.Customer.create(
+                    email = request.user.email,
+                    phone = request.user.phone
+                )
+                print(customer,'llllllllllllllllll')
+
         try:
-            
             checkout_session = stripe.checkout.Session.create(
                 line_items=[
                     {
-                        'price': 'price_1OLLqMSGhzZ6Pyhpl5B4CUg5',
+                        'price': data['default_price']['id'],
                         'quantity': 1,
                     },
                 ],
                 mode='payment',
-                success_url= settings.FRONT_URL + '?success=true&session_id={CHECKOUT_SESSION_ID}',
-                cancel_url= settings.FRONT_URL + '?canceled=true',
+                customer=customer.id ,
+                success_url= 'http://localhost:5173' + '/payment/?success=true&session_id={CHECKOUT_SESSION_ID}',
+                cancel_url= 'http://localhost:5173' + '/payment/?canceled=true',
+                
             )
-            return redirect(checkout_session.url)
+            print('hoyyyyyyaaa')
+            return Response({'url': checkout_session.url},status=status.HTTP_200_OK)
+
         except Exception as e:
             print(e)
             return Response({'msg':'somthing went wrong on stripe'},
