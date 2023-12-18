@@ -21,6 +21,8 @@ from django.contrib.gis.geos import Point
 import stripe
 from django.conf import settings
 from django.shortcuts import redirect
+from django.db import transaction
+from .models import Shopping,ShoppingDeliveryPerson,ShoppingPayment
 
 
 class UserCurrentLocation(APIView):
@@ -208,12 +210,39 @@ class AddToCart(APIView):
             return Response(
                 {"msg": "Something wrong"}, status=status.HTTP_400_BAD_REQUEST
             )
+        
+
+
 
 
 
 stripe.api_key = config('STRIPE_CLIENT_SECRET')
 @permission_classes([IsAuthenticated])
 class PaymentView(APIView):
+
+    def get(self,request):
+        print('blaaaaaaaah')
+        print(request.user)
+        profile = UserProfile.objects.get(user=request.user)
+        if profile.cart is not None:
+                cart_items = profile.cart[0][list(profile.cart[0].keys())[0]][0]
+                food_item_ids = list(cart_items.keys())
+                food_item_counts = list(cart_items.values())
+                cart_food_summery = (
+                        FoodMenu.objects
+                        .filter(id__in=food_item_ids)
+                        .annotate(cart_item_count=Case(
+                            *[When(id=item_id, then=count) for item_id, count in zip(food_item_ids, food_item_counts)],
+                            default=0,
+                            output_field=IntegerField()
+                        ))
+                        .aggregate(total_price=Sum(F('cart_item_count') * F('food_price'))
+                                   )
+                )
+                return Response(cart_food_summery,status=status.HTTP_200_OK)
+
+
+
     def post(self,request):
         profile = UserProfile.objects.get(user=request.user)
         if profile.cart is not None:
@@ -248,7 +277,6 @@ class PaymentView(APIView):
                     email = request.user.email,
                     phone = request.user.phone
                 )
-                print(customer,'llllllllllllllllll')
 
         try:
             checkout_session = stripe.checkout.Session.create(
@@ -264,7 +292,25 @@ class PaymentView(APIView):
                 cancel_url= 'http://localhost:5173' + '/payment/?canceled=true',
                 
             )
-            print('hoyyyyyyaaa')
+            # edit thissssssssssssss
+            with transaction.atomic():
+                    for item_id, count in zip(food_item_ids, food_item_counts):
+                        food_item = FoodMenu.objects.get(id=item_id)
+                        total_amount = food_item.food_price * count
+
+                        # Create a Shopping instance for each item
+                        Shopping.objects.create(
+                            user=request.user,
+                            item=food_item,
+                            payment_id=None,  # You may need to set this appropriately
+                            del_location=None,  # Set this appropriately
+                            address=None,  # Set this appropriately
+                            quantity=count,
+                            total_amount=total_amount,
+                            is_canceled=False,
+                            is_completed=False
+                        )
+            print('hoyyyyyyaaa',checkout_session)
             return Response({'url': checkout_session.url},status=status.HTTP_200_OK)
 
         except Exception as e:

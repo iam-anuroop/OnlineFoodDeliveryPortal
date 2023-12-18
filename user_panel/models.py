@@ -4,9 +4,20 @@ from accounts.models import MyUser
 from delivery_boy.models import DeliveryPerson
 
 
+class ShoppingPayment(models.Model):
+    STATUS_CHOICES = [
+        ("success", "Success"),
+        ("incomplete", "Incomplete"),
+    ]
+    stripe_id = models.CharField(max_length=255,null=True, blank=True)
+    status = models.CharField(max_length=100,choices=STATUS_CHOICES)
+
+
+
 class Shopping(models.Model):
     user = models.ForeignKey(MyUser, on_delete=models.PROTECT, db_index=True)
     item = models.ForeignKey(FoodMenu, on_delete=models.PROTECT, db_index=True)
+    payment_id = models.ForeignKey(ShoppingPayment,on_delete=models.CASCADE,null=True, blank=True)
     del_location = models.PointField(srid=4326, null=True, blank=True, db_index=True)
     address = models.TextField(null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
@@ -18,6 +29,8 @@ class Shopping(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.item} - {self.status}"
+    
+
 
 
 class DeliveryNotification(models.Model):
@@ -28,6 +41,7 @@ class DeliveryNotification(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     shopping = models.ForeignKey(Shopping, on_delete=models.PROTECT)
     delivery_person = models.ForeignKey(DeliveryPerson, on_delete=models.PROTECT)
+
 
 
 class ShoppingDeliveryPerson(models.Model):
