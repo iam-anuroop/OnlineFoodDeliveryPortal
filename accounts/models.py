@@ -61,7 +61,9 @@ class UserProfile(models.Model):
         MyUser, on_delete=models.CASCADE, related_name="userprofile"
     )
     user_address = models.TextField(null=True, blank=True)
+    address_loc = models.PointField(srid=4326, null=True, blank=True)
     office_address = models.TextField(null=True, blank=True)
+    office_loc = models.PointField(srid=4326, null=True, blank=True)
     alt_phone = models.CharField(null=True, blank=True)
     location = models.PointField(srid=4326, null=True, blank=True)
     cart = models.JSONField(null=True, blank=True)

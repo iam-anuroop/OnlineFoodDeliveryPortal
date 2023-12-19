@@ -10,7 +10,8 @@ from rest_framework import status
 from accounts.models import MyUser, UserProfile, SavedLocations
 from user_panel.serializers import UserProfileSerializer
 from hotel_panel.models import FoodMenu
-from hotel_panel.serializer import FoodmenuSerializer
+from hotel_panel.serializer import FoodmenuSerializer , HotelAccountSeriallizer
+from hotel_panel.models import HotelsAccount
 from ipware import get_client_ip
 import json, urllib
 from decouple import config
@@ -239,7 +240,11 @@ class PaymentView(APIView):
                         .aggregate(total_price=Sum(F('cart_item_count') * F('food_price'))
                                    )
                 )
-                return Response(cart_food_summery,status=status.HTTP_200_OK)
+
+                hotel_det = HotelsAccount.objects.get(id=list(profile.cart[0].keys())[0])
+                serializer = HotelAccountSeriallizer(hotel_det)
+                
+                return Response({'hotel':serializer.data,'total':cart_food_summery},status=status.HTTP_200_OK)
 
 
 
@@ -271,7 +276,6 @@ class PaymentView(APIView):
                     expand=["default_price"],
                 )       
 
-                print(data.id)
 
                 customer = stripe.Customer.create(
                     email = request.user.email,
@@ -319,4 +323,9 @@ class PaymentView(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
+
+class AddressManage(APIView):
+    print('helloooo')
 # Create your views here.
