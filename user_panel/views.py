@@ -3,7 +3,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 # from django.contrib.auth import authenticate
-from .serializers import UserSerilaizer
+from .serializers import UserSerilaizer , AddressSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -325,7 +325,37 @@ class PaymentView(APIView):
 
 
 
-
+@permission_classes([IsAuthenticated])
 class AddressManage(APIView):
-    print('helloooo')
+
+    def post(self,request):
+        params = request.GET.get('address')
+        # print(request.data)
+        address = request.data.get('address')
+        serializer = AddressSerializer(data = address)
+        if serializer.is_valid():
+            print(serializer.data)
+
+
+            if params == 'home':
+                print(params)
+
+
+                return Response('niiiii')
+
+            if params == 'office':
+                print(params)
+
+                return Response('noouuuu')
+            
+        return Response('noooooo')
+    
+    def get(self,request):
+        profile = UserProfile.objects.get(user=request.user)
+        serializer = UserProfileSerializer(profile)
+            
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+
+
 # Create your views here.
