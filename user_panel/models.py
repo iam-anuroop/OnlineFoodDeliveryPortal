@@ -11,6 +11,12 @@ class ShoppingPayment(models.Model):
     ]
     stripe_id = models.CharField(max_length=255,null=True, blank=True)
     status = models.CharField(max_length=100,choices=STATUS_CHOICES)
+    total_amount = models.FloatField(null=True,blank=True)
+
+    
+    is_canceled = models.BooleanField(default=False)
+    is_completed = models.BooleanField(default=False)
+
 
 
 
@@ -22,10 +28,7 @@ class Shopping(models.Model):
     address = models.TextField(null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
     quantity = models.IntegerField()
-    total_amount = models.FloatField()
 
-    is_canceled = models.BooleanField(default=False)
-    is_completed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user} - {self.item} - {self.status}"

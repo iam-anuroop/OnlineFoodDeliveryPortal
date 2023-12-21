@@ -30,6 +30,10 @@ class UserSerilaizer(serializers.ModelSerializer):
             userprofile.save()
         return instance
 
+
 class AddressSerializer(serializers.Serializer):
     address = serializers.CharField()
+    coords = serializers.ListField(
+        child=serializers.FloatField()
+    )
 

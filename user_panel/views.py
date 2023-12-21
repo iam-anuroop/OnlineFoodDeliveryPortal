@@ -292,11 +292,27 @@ class PaymentView(APIView):
                 ],
                 mode='payment',
                 customer=customer.id ,
-                success_url= 'http://localhost:5173' + '/payment/?success=true&session_id={CHECKOUT_SESSION_ID}',
-                cancel_url= 'http://localhost:5173' + '/payment/?canceled=true',
+                success_url= 'http://localhost:5173' + '/success/?success=true&session_id={CHECKOUT_SESSION_ID}',
+                cancel_url= 'http://localhost:5173' + '/canceled/?canceled=true',
                 
             )
             # edit thissssssssssssss
+
+            shopping_payment = ShoppingPayment.objects.create(
+            stripe_id=checkout_session.id,
+            total_amount=cart_food_summery['total_price'],
+            # Add other relevant fields
+            )
+            location = request.GET.get('address')
+            address = request.GET.get('address')
+            profile = UserProfile.objects.get(user = request.user)
+            if address == 'home':
+                location = profile.address_loc
+                address = profile.user_address
+            if address == 'office':
+                location = profile.office_loc
+                address = profile.office_address
+
             with transaction.atomic():
                     for item_id, count in zip(food_item_ids, food_item_counts):
                         food_item = FoodMenu.objects.get(id=item_id)
@@ -306,15 +322,13 @@ class PaymentView(APIView):
                         Shopping.objects.create(
                             user=request.user,
                             item=food_item,
-                            payment_id=None,  # You may need to set this appropriately
-                            del_location=None,  # Set this appropriately
-                            address=None,  # Set this appropriately
+                            payment_id=shopping_payment,  # You may need to set this appropriately
+                            del_location=location,  # Set this appropriately
+                            address=address,  # Set this appropriately
                             quantity=count,
-                            total_amount=total_amount,
                             is_canceled=False,
                             is_completed=False
                         )
-            print('hoyyyyyyaaa',checkout_session)
             return Response({'url': checkout_session.url},status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -324,31 +338,49 @@ class PaymentView(APIView):
 
 
 
+@permission_classes([IsAuthenticated])
+class PaymentSuccessView(APIView):
+    def post(self,request):
+
+        session_id = request.GET.get('session_id')
+        payment_instance = ShoppingPayment.objects.get(stripe_id=session_id)
+        payment_instance.status = 'success'
+        payment_instance.is_completed = True
+        payment_instance.save()
+
+        return Response({'msg':'Completed Success fully'},status=status.HTTP_200_OK)
+
+
+
+
 
 @permission_classes([IsAuthenticated])
 class AddressManage(APIView):
 
     def post(self,request):
         params = request.GET.get('address')
-        # print(request.data)
-        address = request.data.get('address')
-        serializer = AddressSerializer(data = address)
+
+        serializer = AddressSerializer(data = request.data)
+
         if serializer.is_valid():
-            print(serializer.data)
-
-
+            profile = UserProfile.objects.get(user=request.user)
+            address = serializer.validated_data.get('address')
+            coords = serializer.validated_data.get('coords')
+            location = Point(coords[1],coords[0])
+        
             if params == 'home':
-                print(params)
-
-
-                return Response('niiiii')
+                profile.user_address = address
+                profile.address_loc = location
 
             if params == 'office':
-                print(params)
+                profile.office_address = address
+                profile.office_loc = location
 
-                return Response('noouuuu')
+            profile.save()
+            serializer = UserProfileSerializer(profile)
+            return Response(serializer.data,status=status.HTTP_200_OK)
             
-        return Response('noooooo')
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
     def get(self,request):
         profile = UserProfile.objects.get(user=request.user)

@@ -4,7 +4,9 @@ from .views import (
     UserCurrentLocation, 
     AddToCart, 
     PaymentView, 
-    AddressManage
+    PaymentSuccessView,
+    AddressManage,
+
     )
 
 urlpatterns = [
@@ -13,4 +15,5 @@ urlpatterns = [
     path("address/", AddressManage.as_view(), name="address"),
     path("addtocart/", AddToCart.as_view(), name="addtocart"),
     path("payment/", PaymentView.as_view(), name="payment"),
+    path("success/", PaymentSuccessView.as_view(), name="success"),
 ]
