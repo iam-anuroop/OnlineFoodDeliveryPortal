@@ -338,17 +338,20 @@ class FoodmenuView(APIView):
     )
     def get(self, request):
         hotel_email = request.auth
+        print(request.auth)
         hotel = HotelsAccount.objects.get(email=hotel_email)
         query = request.GET.get("q")
+        print(query,'pppppppp')
         if query:
-            hotels = FoodMenu.objects.filter(
+            foods = FoodMenu.objects.filter(
                 Q(hotel=hotel) & Q(food_name__icontains=query)
                 | Q(description__icontains=query)
                 | Q(food_type__icontains=query)
             )
         else:
-            hotels = FoodMenu.objects.filter(hotel=hotel)
-        return Response({"hotels": hotels, "query": query}, status=status.HTTP_200_OK)
+            foods = FoodMenu.objects.filter(hotel=hotel)
+        serializer = FoodPostSerializer(foods,many=True)
+        return Response({"foods": serializer.data, "query": query}, status=status.HTTP_200_OK)
 
 
 # profile view for hotel to see their details
