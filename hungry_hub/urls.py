@@ -23,6 +23,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
+
 schema_view = get_schema_view(
     openapi.Info(
         title="Food Delivery API",
@@ -44,6 +45,7 @@ urlpatterns = [
     path("adminpanel/", include("admin_panel.urls")),
     path("pages/", include("pages.urls")),
     path("delivery/", include("delivery_boy.urls")),
+    path("chat/", include("chat.urls")),
     path(
         "swagger<format>/", schema_view.without_ui(cache_timeout=0), name="schema-json"
     ),

@@ -59,6 +59,9 @@ INSTALLED_APPS = [
     "admin_panel",
     "pages",
     "delivery_boy",
+    "chat",
+    "channels",
+
 ]
 
 MIDDLEWARE = [
@@ -71,6 +74,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
 ]
+
+ASGI_APPLICATION = "hungry_hub.wsgi.application"
+
 
 ROOT_URLCONF = "hungry_hub.urls"
 
