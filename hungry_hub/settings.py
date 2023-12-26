@@ -75,7 +75,15 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
 ]
 
-ASGI_APPLICATION = "hungry_hub.wsgi.application"
+# channels
+ASGI_APPLICATION = "hungry_hub.routing.application" #routing.py will handle the ASGI
+# ASGI_APPLICATION = "hungry_hub.asgi.application"
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': "channels.layers.InMemoryChannelLayer"
+        }
+    }
+#channels
 
 
 ROOT_URLCONF = "hungry_hub.urls"

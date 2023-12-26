@@ -11,6 +11,7 @@ class SendMessageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        print('heloooo')
         serializer = MessageSerializer(data=request.data)
 
         if serializer.is_valid():
