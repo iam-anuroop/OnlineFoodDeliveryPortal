@@ -31,7 +31,7 @@ class Shopping(models.Model):
 
 
     def __str__(self):
-        return f"{self.user} - {self.item} - {self.status}"
+        return f"{self.user} - {self.item} "
     
 
 

@@ -3,7 +3,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 # from django.contrib.auth import authenticate
-from .serializers import UserSerilaizer , AddressSerializer
+from .serializers import UserSerilaizer , AddressSerializer , AllShoppingSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -16,7 +16,8 @@ from ipware import get_client_ip
 import json, urllib
 from decouple import config
 from drf_yasg.utils import swagger_auto_schema
-from django.db.models import Q, F, Count, Sum, When, IntegerField, Case
+from django.db.models import Q, F, Count, Sum, When, IntegerField, Case, Subquery, OuterRef
+from django.db.models.functions import Coalesce
 import json
 from django.contrib.gis.geos import Point
 import stripe
@@ -24,6 +25,7 @@ from django.conf import settings
 from django.shortcuts import redirect
 from django.db import transaction
 from .models import Shopping,ShoppingDeliveryPerson,ShoppingPayment
+
 
 
 class UserCurrentLocation(APIView):
@@ -387,6 +389,37 @@ class AddressManage(APIView):
         serializer = UserProfileSerializer(profile)
             
         return Response(serializer.data,status=status.HTTP_200_OK)
+    
+
+
+@permission_classes([IsAuthenticated])
+class AllOrdersOfUser(APIView):
+    def get(self,request):
+
+        user = request.user
+
+        shoppings = ShoppingPayment.objects.filter(
+                    shopping__user=user
+                ).distinct()
+        
+        shoppings = shoppings.annotate(
+            first_shopping_hotel_name=Subquery(
+                Shopping.objects.filter(
+                    payment_id=OuterRef('pk')
+                ).order_by('date').values('item__hotel__hotel_name')[:1]
+            ),
+            hotel_image = Subquery(
+                Shopping.objects.filter(
+                    payment_id=OuterRef('pk')
+                ).order_by('date').values('item__hotel__profile_photo')[:1]
+            )
+            ).values()
+        
+        # serializer = AllShoppingSerializer(shoppings,many=True)
+        
+        
+        
+        return Response(shoppings,status=status.HTTP_200_OK)
 
 
 

@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from accounts.models import MyUser, UserProfile
+from accounts.models import MyUser, UserProfile 
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from .models import Shopping,ShoppingPayment
 
 
 class UserProfileSerializer(GeoFeatureModelSerializer):
@@ -37,3 +38,8 @@ class AddressSerializer(serializers.Serializer):
         child=serializers.FloatField()
     )
 
+
+class AllShoppingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingPayment
+        fields = '__all__'

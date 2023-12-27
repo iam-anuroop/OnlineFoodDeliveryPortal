@@ -6,17 +6,32 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Message
 from .serializers import MessageSerializer
+from accounts.models import MyUser
 
 class SendMessageView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
-        print('heloooo')
-        serializer = MessageSerializer(data=request.data)
+    def post(self, request):
+        message_data = request.data.get("message", {})
+        text = message_data.get("text", "")
+        sender = message_data.get("sender", "")
+
+        print("Text:", text)
+        print("Sender:", sender)
+
+        serializer = MessageSerializer(data={"content":text})
 
         if serializer.is_valid():
-            serializer.save(sender=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            content = serializer.validated_data.get('content')
+            sender = MyUser.objects.get(email = sender)
+            user = request.user
+            if sender!=user:
+                Message.objects.create(
+                    content=content,
+                    sender=sender,
+                    receiver=user
+                )
+            return Response({'msg':'message saved'}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -24,7 +39,7 @@ class SendMessageView(APIView):
 class InboxView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         received_messages = Message.objects.filter(receiver=request.user)
         sent_messages = Message.objects.filter(sender=request.user)
 

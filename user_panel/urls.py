@@ -6,6 +6,7 @@ from .views import (
     PaymentView, 
     PaymentSuccessView,
     AddressManage,
+    AllOrdersOfUser
 
     )
 
@@ -16,4 +17,5 @@ urlpatterns = [
     path("addtocart/", AddToCart.as_view(), name="addtocart"),
     path("payment/", PaymentView.as_view(), name="payment"),
     path("success/", PaymentSuccessView.as_view(), name="success"),
+    path("allorders/", AllOrdersOfUser.as_view(), name="allorders"),
 ]
