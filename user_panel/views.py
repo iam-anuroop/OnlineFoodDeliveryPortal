@@ -1,30 +1,27 @@
-# from django.shortcuts import render
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
-
-# from django.contrib.auth import authenticate
-from .serializers import UserSerilaizer , AddressSerializer , AllShoppingSerializer
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import status
-from accounts.models import MyUser, UserProfile, SavedLocations
-from user_panel.serializers import UserProfileSerializer
-from hotel_panel.models import FoodMenu
-from hotel_panel.serializer import FoodmenuSerializer , HotelAccountSeriallizer
-from hotel_panel.models import HotelsAccount
-from ipware import get_client_ip
+import json
+import stripe
 import json, urllib
 from decouple import config
-from drf_yasg.utils import swagger_auto_schema
-from django.db.models import Q, F, Count, Sum, When, IntegerField, Case, Subquery, OuterRef
-from django.db.models.functions import Coalesce
-import json
-from django.contrib.gis.geos import Point
-import stripe
 from django.conf import settings
-from django.shortcuts import redirect
+from ipware import get_client_ip
 from django.db import transaction
+from rest_framework import status
+from django.shortcuts import redirect
+from hotel_panel.models import FoodMenu
+from rest_framework.views import APIView
+from django.contrib.gis.geos import Point
+from hotel_panel.models import HotelsAccount
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from django.db.models.functions import Coalesce
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+from user_panel.serializers import UserProfileSerializer
+from accounts.models import MyUser, UserProfile, SavedLocations
 from .models import Shopping,ShoppingDeliveryPerson,ShoppingPayment
+from hotel_panel.serializer import FoodmenuSerializer , HotelAccountSeriallizer
+from django.db.models import Q, F, Count, Sum, When, IntegerField, Case, Subquery, OuterRef
+from .serializers import UserSerilaizer , AddressSerializer , AllShoppingSerializer,ShoppingSerializer
 
 
 
@@ -420,6 +417,19 @@ class AllOrdersOfUser(APIView):
         
         
         return Response(shoppings,status=status.HTTP_200_OK)
+
+
+class OrderDetails(APIView):
+    def get(self,request):
+        try:
+            pay_id = request.GET.get('pay_id')
+            payment = ShoppingPayment.objects.get(id=pay_id)
+            order_det = Shopping.objects.filter(payment_id=pay_id)
+            paymentSerializer = AllShoppingSerializer(payment)
+            orderSerializer = ShoppingSerializer(order_det,many = True)
+            return Response({'payment':paymentSerializer.data,'orders':orderSerializer.data},status=status.HTTP_200_OK)
+        except:
+            return Response({'msg':'error occured'},status=status.HTTP_400_BAD_REQUEST)
 
 
 

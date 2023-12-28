@@ -2,6 +2,7 @@ from rest_framework import serializers
 from accounts.models import MyUser, UserProfile 
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from .models import Shopping,ShoppingPayment
+from hotel_panel.serializer import FoodPostSerializer
 
 
 class UserProfileSerializer(GeoFeatureModelSerializer):
@@ -38,6 +39,11 @@ class AddressSerializer(serializers.Serializer):
         child=serializers.FloatField()
     )
 
+class ShoppingSerializer(serializers.ModelSerializer):
+    item = FoodPostSerializer()
+    class Meta:
+        model = Shopping
+        fields = '__all__'
 
 class AllShoppingSerializer(serializers.ModelSerializer):
     class Meta:

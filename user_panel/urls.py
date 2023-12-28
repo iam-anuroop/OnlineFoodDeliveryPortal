@@ -6,8 +6,8 @@ from .views import (
     PaymentView, 
     PaymentSuccessView,
     AddressManage,
-    AllOrdersOfUser
-
+    AllOrdersOfUser,
+    OrderDetails
     )
 
 urlpatterns = [
@@ -18,4 +18,5 @@ urlpatterns = [
     path("payment/", PaymentView.as_view(), name="payment"),
     path("success/", PaymentSuccessView.as_view(), name="success"),
     path("allorders/", AllOrdersOfUser.as_view(), name="allorders"),
+    path("orderdetails/", OrderDetails.as_view(), name="orderdetails"),
 ]
