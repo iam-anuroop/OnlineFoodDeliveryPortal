@@ -1,6 +1,10 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from .serializers import DeliveryPostSerializer, LocationSerializer,DeliveryPersonSerializer
+from .serializers import (
+    DeliveryPostSerializer,
+    LocationSerializer,
+    DeliveryPersonSerializer,
+)
 from rest_framework.response import Response
 from rest_framework import status
 from .models import DeliveryPerson
@@ -56,23 +60,23 @@ class DeliveryBoyCrud(APIView):
         serializer = DeliveryPersonSerializer(
             delivery_person, data=request.data, partial=True
         )
-        
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
-    def get(self,request):
+    def get(self, request):
         try:
             delivery_person = DeliveryPerson.objects.get(user=request.user)
         except:
-            return Response({'msg':'You are not a delivery person'},status=status.HTTP_400_BAD_REQUEST)
-        
-        serializer = DeliveryPostSerializer(delivery_person)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-        
+            return Response(
+                {"msg": "You are not a delivery person"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
+        serializer = DeliveryPostSerializer(delivery_person)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # Create your views here.

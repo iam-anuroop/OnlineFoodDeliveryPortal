@@ -341,7 +341,7 @@ class FoodmenuView(APIView):
         print(request.auth)
         hotel = HotelsAccount.objects.get(email=hotel_email)
         query = request.GET.get("q")
-        print(query,'pppppppp')
+        print(query, "pppppppp")
         if query:
             foods = FoodMenu.objects.filter(
                 Q(hotel=hotel) & Q(food_name__icontains=query)
@@ -350,8 +350,10 @@ class FoodmenuView(APIView):
             )
         else:
             foods = FoodMenu.objects.filter(hotel=hotel)
-        serializer = FoodPostSerializer(foods,many=True)
-        return Response({"foods": serializer.data, "query": query}, status=status.HTTP_200_OK)
+        serializer = FoodPostSerializer(foods, many=True)
+        return Response(
+            {"foods": serializer.data, "query": query}, status=status.HTTP_200_OK
+        )
 
 
 # profile view for hotel to see their details
@@ -366,7 +368,7 @@ class HotelProfileView(APIView):
                 {"msg": "Something wrong while getting this hotel"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
- 
+
         serializer = HotelAccountSeriallizer(hotel)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -1,14 +1,14 @@
 from django.urls import path
 from .views import (
-    ProfileManage, 
-    UserCurrentLocation, 
-    AddToCart, 
-    PaymentView, 
+    ProfileManage,
+    UserCurrentLocation,
+    AddToCart,
+    PaymentView,
     PaymentSuccessView,
     AddressManage,
     AllOrdersOfUser,
-    OrderDetails
-    )
+    OrderDetails,
+)
 
 urlpatterns = [
     path("profile/", ProfileManage.as_view(), name="profile"),

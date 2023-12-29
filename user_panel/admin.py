@@ -4,16 +4,36 @@ from .models import (
     Shopping,
     ShoppingDeliveryPerson,
     ShoppingPayment,
-    DeliveryNotification
-    )
+    DeliveryNotification,
+)
 
 
 class ShoppingAdmin(OSMGeoAdmin):
     list_display = ("id", "item", "payment_id")
-admin.site.register(Shopping,ShoppingAdmin)
 
 
-class ShoppingPaymentAdmin(admin.ModelAdmin):
-    list_display = ('id','stripe_id')
-admin.site.register(ShoppingPayment,ShoppingPaymentAdmin)
+admin.site.register(Shopping, ShoppingAdmin)
+
+
+class ShoppingPaymentAdmin(OSMGeoAdmin):
+    list_display = ("id", "stripe_id")
+
+
+admin.site.register(ShoppingPayment, ShoppingPaymentAdmin)
+
+
+class DeliveryNotificationAdmin(admin.ModelAdmin):
+    list_display = ("id", "delivery_person", "status")
+
+
+admin.site.register(DeliveryNotification, DeliveryNotificationAdmin)
+
+
+class ShoppingDeliveryPersonAdmin(admin.ModelAdmin):
+    list_display = ("id", "delivery_person", "status")
+
+
+admin.site.register(ShoppingDeliveryPerson, ShoppingDeliveryPersonAdmin)
+
+
 # Register your models here.

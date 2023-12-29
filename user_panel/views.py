@@ -18,11 +18,26 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from user_panel.serializers import UserProfileSerializer
 from accounts.models import MyUser, UserProfile, SavedLocations
-from .models import Shopping,ShoppingDeliveryPerson,ShoppingPayment
-from hotel_panel.serializer import FoodmenuSerializer , HotelAccountSeriallizer
-from django.db.models import Q, F, Count, Sum, When, IntegerField, Case, Subquery, OuterRef
-from .serializers import UserSerilaizer , AddressSerializer , AllShoppingSerializer,ShoppingSerializer
-
+from .models import Shopping, ShoppingDeliveryPerson, ShoppingPayment
+from hotel_panel.serializer import FoodmenuSerializer, HotelAccountSeriallizer
+from django.db.models import (
+    Q,
+    F,
+    Count,
+    Sum,
+    When,
+    IntegerField,
+    Case,
+    Subquery,
+    OuterRef,
+)
+from .serializers import (
+    UserSerilaizer,
+    AddressSerializer,
+    AllShoppingSerializer,
+    ShoppingSerializer,
+    ShoppingDeliveryPersonSerializer,
+)
 
 
 class UserCurrentLocation(APIView):
@@ -154,7 +169,7 @@ class AddToCart(APIView):
                                 x = [{hotel: [{item: 1}]}]
                                 profile.cart = x
                     except:
-                        print('iam here')
+                        print("iam here")
                         x = [{hotel: [{item: 1}]}]
                         profile.cart = x
                 else:
@@ -210,227 +225,230 @@ class AddToCart(APIView):
             return Response(
                 {"msg": "Something wrong"}, status=status.HTTP_400_BAD_REQUEST
             )
-        
 
 
+stripe.api_key = config("STRIPE_CLIENT_SECRET")
 
 
-
-stripe.api_key = config('STRIPE_CLIENT_SECRET')
 @permission_classes([IsAuthenticated])
 class PaymentView(APIView):
-
-    def get(self,request):
-        print('blaaaaaaaah')
+    def get(self, request):
+        print("blaaaaaaaah")
         print(request.user)
         profile = UserProfile.objects.get(user=request.user)
         if profile.cart is not None:
-                cart_items = profile.cart[0][list(profile.cart[0].keys())[0]][0]
-                food_item_ids = list(cart_items.keys())
-                food_item_counts = list(cart_items.values())
-                cart_food_summery = (
-                        FoodMenu.objects
-                        .filter(id__in=food_item_ids)
-                        .annotate(cart_item_count=Case(
-                            *[When(id=item_id, then=count) for item_id, count in zip(food_item_ids, food_item_counts)],
-                            default=0,
-                            output_field=IntegerField()
-                        ))
-                        .aggregate(total_price=Sum(F('cart_item_count') * F('food_price'))
-                                   )
+            cart_items = profile.cart[0][list(profile.cart[0].keys())[0]][0]
+            food_item_ids = list(cart_items.keys())
+            food_item_counts = list(cart_items.values())
+            cart_food_summery = (
+                FoodMenu.objects.filter(id__in=food_item_ids)
+                .annotate(
+                    cart_item_count=Case(
+                        *[
+                            When(id=item_id, then=count)
+                            for item_id, count in zip(food_item_ids, food_item_counts)
+                        ],
+                        default=0,
+                        output_field=IntegerField()
+                    )
                 )
+                .aggregate(total_price=Sum(F("cart_item_count") * F("food_price")))
+            )
 
-                hotel_det = HotelsAccount.objects.get(id=list(profile.cart[0].keys())[0])
-                serializer = HotelAccountSeriallizer(hotel_det)
-                
-                return Response({'hotel':serializer.data,'total':cart_food_summery},status=status.HTTP_200_OK)
+            hotel_det = HotelsAccount.objects.get(id=list(profile.cart[0].keys())[0])
+            serializer = HotelAccountSeriallizer(hotel_det)
 
+            return Response(
+                {"hotel": serializer.data, "total": cart_food_summery},
+                status=status.HTTP_200_OK,
+            )
 
-
-    def post(self,request):
+    def post(self, request):
         profile = UserProfile.objects.get(user=request.user)
         if profile.cart is not None:
-                cart_items = profile.cart[0][list(profile.cart[0].keys())[0]][0]
-                food_item_ids = list(cart_items.keys())
-                food_item_counts = list(cart_items.values())
-                cart_food_summery = (
-                        FoodMenu.objects
-                        .filter(id__in=food_item_ids)
-                        .annotate(cart_item_count=Case(
-                            *[When(id=item_id, then=count) for item_id, count in zip(food_item_ids, food_item_counts)],
-                            default=0,
-                            output_field=IntegerField()
-                        ))
-                        .aggregate(total_price=Sum(F('cart_item_count') * F('food_price'))
-                                   )
+            cart_items = profile.cart[0][list(profile.cart[0].keys())[0]][0]
+            food_item_ids = list(cart_items.keys())
+            food_item_counts = list(cart_items.values())
+            cart_food_summery = (
+                FoodMenu.objects.filter(id__in=food_item_ids)
+                .annotate(
+                    cart_item_count=Case(
+                        *[
+                            When(id=item_id, then=count)
+                            for item_id, count in zip(food_item_ids, food_item_counts)
+                        ],
+                        default=0,
+                        output_field=IntegerField()
+                    )
                 )
-                print(cart_food_summery['total_price'],'kkkkkkkkkkkk')    
+                .aggregate(total_price=Sum(F("cart_item_count") * F("food_price")))
+            )
+            print(cart_food_summery["total_price"], "kkkkkkkkkkkk")
 
-                data = stripe.Product.create(
-                    name = "Total amount",
-                    default_price_data={
-                        "unit_amount":int(cart_food_summery['total_price']*100),
-                        "currency":'inr'
-                    },
-                    expand=["default_price"],
-                )       
+            data = stripe.Product.create(
+                name="Total amount",
+                default_price_data={
+                    "unit_amount": int(cart_food_summery["total_price"] * 100),
+                    "currency": "inr",
+                },
+                expand=["default_price"],
+            )
 
-
-                customer = stripe.Customer.create(
-                    email = request.user.email,
-                    phone = request.user.phone
-                )
+            customer = stripe.Customer.create(
+                email=request.user.email, phone=request.user.phone
+            )
 
         try:
             checkout_session = stripe.checkout.Session.create(
                 line_items=[
                     {
-                        'price': data['default_price']['id'],
-                        'quantity': 1,
+                        "price": data["default_price"]["id"],
+                        "quantity": 1,
                     },
                 ],
-                mode='payment',
-                customer=customer.id ,
-                success_url= 'http://localhost:5173' + '/success/?success=true&session_id={CHECKOUT_SESSION_ID}',
-                cancel_url= 'http://localhost:5173' + '/canceled/?canceled=true',
-                
+                mode="payment",
+                customer=customer.id,
+                success_url="http://localhost:5173"
+                + "/success/?success=true&session_id={CHECKOUT_SESSION_ID}",
+                cancel_url="http://localhost:5173" + "/canceled/?canceled=true",
             )
-            # edit thissssssssssssss
 
-            shopping_payment = ShoppingPayment.objects.create(
-            stripe_id=checkout_session.id,
-            total_amount=cart_food_summery['total_price'],
-            # Add other relevant fields
-            )
-            location = request.GET.get('address')
-            address = request.GET.get('address')
-            profile = UserProfile.objects.get(user = request.user)
-            if address == 'home':
+
+            location = request.GET.get("address")
+            address = request.GET.get("address")
+            profile = UserProfile.objects.get(user=request.user)
+            if address == "home":
                 location = profile.address_loc
                 address = profile.user_address
-            if address == 'office':
+            if address == "office":
                 location = profile.office_loc
                 address = profile.office_address
 
-            with transaction.atomic():
-                    for item_id, count in zip(food_item_ids, food_item_counts):
-                        food_item = FoodMenu.objects.get(id=item_id)
-                        total_amount = food_item.food_price * count
+            food = FoodMenu.objects.filter(id=food_item_ids[0]).first()
+            hotel_loc = food.hotel.location
 
-                        # Create a Shopping instance for each item
-                        Shopping.objects.create(
-                            user=request.user,
-                            item=food_item,
-                            payment_id=shopping_payment,  # You may need to set this appropriately
-                            del_location=location,  # Set this appropriately
-                            address=address,  # Set this appropriately
-                            quantity=count,
-                            is_canceled=False,
-                            is_completed=False
-                        )
-            return Response({'url': checkout_session.url},status=status.HTTP_200_OK)
+            shopping_payment = ShoppingPayment.objects.create(
+                stripe_id=checkout_session.id,
+                total_amount=cart_food_summery["total_price"],
+                del_location=location,
+                address=address,
+                hotel_loc = hotel_loc
+            )
+
+            with transaction.atomic():
+                for item_id, count in zip(food_item_ids, food_item_counts):
+                    food_item = FoodMenu.objects.get(id=item_id)
+                    # total_amount = food_item.food_price * count
+                    print('1')
+                    Shopping.objects.create(
+                        user=request.user,
+                        item=food_item,
+                        payment_id=shopping_payment,
+                        quantity=count,
+                    )
+            return Response({"url": checkout_session.url}, status=status.HTTP_200_OK)
 
         except Exception as e:
             print(e)
-            return Response({'msg':'somthing went wrong on stripe'},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            return Response(
+                {"msg": "somthing went wrong on stripe"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 @permission_classes([IsAuthenticated])
 class PaymentSuccessView(APIView):
-    def post(self,request):
-
-        session_id = request.GET.get('session_id')
+    def post(self, request):
+        session_id = request.GET.get("session_id")
         payment_instance = ShoppingPayment.objects.get(stripe_id=session_id)
-        payment_instance.status = 'success'
+        payment_instance.status = "success"
         payment_instance.is_completed = True
         payment_instance.save()
 
-        return Response({'msg':'Completed Success fully'},status=status.HTTP_200_OK)
-
-
-
+        return Response({"msg": "Completed Success fully"}, status=status.HTTP_200_OK)
 
 
 @permission_classes([IsAuthenticated])
 class AddressManage(APIView):
+    def post(self, request):
+        params = request.GET.get("address")
 
-    def post(self,request):
-        params = request.GET.get('address')
-
-        serializer = AddressSerializer(data = request.data)
+        serializer = AddressSerializer(data=request.data)
 
         if serializer.is_valid():
             profile = UserProfile.objects.get(user=request.user)
-            address = serializer.validated_data.get('address')
-            coords = serializer.validated_data.get('coords')
-            location = Point(coords[1],coords[0])
-        
-            if params == 'home':
+            address = serializer.validated_data.get("address")
+            coords = serializer.validated_data.get("coords")
+            location = Point(coords[1], coords[0])
+
+            if params == "home":
                 profile.user_address = address
                 profile.address_loc = location
 
-            if params == 'office':
+            if params == "office":
                 profile.office_address = address
                 profile.office_loc = location
 
             profile.save()
             serializer = UserProfileSerializer(profile)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-            
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    
-    def get(self,request):
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
         profile = UserProfile.objects.get(user=request.user)
         serializer = UserProfileSerializer(profile)
-            
-        return Response(serializer.data,status=status.HTTP_200_OK)
-    
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @permission_classes([IsAuthenticated])
 class AllOrdersOfUser(APIView):
-    def get(self,request):
-
+    def get(self, request):
         user = request.user
 
-        shoppings = ShoppingPayment.objects.filter(
-                    shopping__user=user
-                ).distinct()
-        
+        shoppings = ShoppingPayment.objects.filter(shopping__user=user).distinct()
+
         shoppings = shoppings.annotate(
             first_shopping_hotel_name=Subquery(
-                Shopping.objects.filter(
-                    payment_id=OuterRef('pk')
-                ).order_by('date').values('item__hotel__hotel_name')[:1]
+                Shopping.objects.filter(payment_id=OuterRef("pk"))
+                .order_by("date")
+                .values("item__hotel__hotel_name")[:1]
             ),
-            hotel_image = Subquery(
-                Shopping.objects.filter(
-                    payment_id=OuterRef('pk')
-                ).order_by('date').values('item__hotel__profile_photo')[:1]
-            )
-            ).values()
-        
+            hotel_image=Subquery(
+                Shopping.objects.filter(payment_id=OuterRef("pk"))
+                .order_by("date")
+                .values("item__hotel__profile_photo")[:1]
+            ),
+        ).values()
+
         # serializer = AllShoppingSerializer(shoppings,many=True)
-        
-        
-        
-        return Response(shoppings,status=status.HTTP_200_OK)
+
+        return Response(shoppings, status=status.HTTP_200_OK)
 
 
 class OrderDetails(APIView):
-    def get(self,request):
+    def get(self, request):
         try:
-            pay_id = request.GET.get('pay_id')
+            pay_id = request.GET.get("pay_id")
             payment = ShoppingPayment.objects.get(id=pay_id)
             order_det = Shopping.objects.filter(payment_id=pay_id)
+            delivery_det = ShoppingDeliveryPerson.objects.get(
+                shopping_payment__id=pay_id
+            )
+            deliverySerializer = ShoppingDeliveryPersonSerializer(delivery_det)
             paymentSerializer = AllShoppingSerializer(payment)
-            orderSerializer = ShoppingSerializer(order_det,many = True)
-            return Response({'payment':paymentSerializer.data,'orders':orderSerializer.data},status=status.HTTP_200_OK)
-        except:
-            return Response({'msg':'error occured'},status=status.HTTP_400_BAD_REQUEST)
-
+            orderSerializer = ShoppingSerializer(order_det, many=True)
+            return Response(
+                {
+                    "payment": paymentSerializer.data,
+                    "orders": orderSerializer.data,
+                    "delivery": deliverySerializer.data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response({"msg": e}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Create your views here.

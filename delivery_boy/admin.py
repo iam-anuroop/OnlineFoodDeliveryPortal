@@ -5,8 +5,9 @@ from .models import DeliveryPerson
 
 
 class DeliveryPersonAdmin(OSMGeoAdmin):
-    list_display=['id']
+    list_display = ["id"]
 
-admin.site.register(DeliveryPerson,DeliveryPersonAdmin)
+
+admin.site.register(DeliveryPerson, DeliveryPersonAdmin)
 
 # Register your models here.

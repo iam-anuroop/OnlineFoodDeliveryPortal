@@ -61,7 +61,6 @@ INSTALLED_APPS = [
     "delivery_boy",
     "chat",
     "channels",
-
 ]
 
 MIDDLEWARE = [
@@ -76,14 +75,10 @@ MIDDLEWARE = [
 ]
 
 # channels
-ASGI_APPLICATION = "hungry_hub.routing.application" #routing.py will handle the ASGI
+ASGI_APPLICATION = "hungry_hub.routing.application"  # routing.py will handle the ASGI
 # ASGI_APPLICATION = "hungry_hub.asgi.application"
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': "channels.layers.InMemoryChannelLayer"
-        }
-    }
-#channels
+CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+# channels
 
 
 ROOT_URLCONF = "hungry_hub.urls"
@@ -178,7 +173,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # CORS_ALLOWED_ORIGINS = 'http://localhost:5173'
-FRONT_URL = 'http://localhost:5173/'
+FRONT_URL = "http://localhost:5173/"
 
 
 AUTH_USER_MODEL = "accounts.MyUser"

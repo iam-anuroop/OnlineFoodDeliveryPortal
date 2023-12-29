@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from accounts.models import MyUser, UserProfile 
+from accounts.models import MyUser, UserProfile
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
-from .models import Shopping,ShoppingPayment
+from .models import Shopping, ShoppingPayment, ShoppingDeliveryPerson
 from hotel_panel.serializer import FoodPostSerializer
 
 
@@ -9,7 +9,14 @@ class UserProfileSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = UserProfile
         geo_field = "location"
-        fields = ["user_address","address_loc", "office_address","office_loc", "alt_phone", "location"]
+        fields = [
+            "user_address",
+            "address_loc",
+            "office_address",
+            "office_loc",
+            "alt_phone",
+            "location",
+        ]
 
 
 class UserSerilaizer(serializers.ModelSerializer):
@@ -35,17 +42,24 @@ class UserSerilaizer(serializers.ModelSerializer):
 
 class AddressSerializer(serializers.Serializer):
     address = serializers.CharField()
-    coords = serializers.ListField(
-        child=serializers.FloatField()
-    )
+    coords = serializers.ListField(child=serializers.FloatField())
+
+
+class ShoppingDeliveryPersonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingDeliveryPerson
+        fields = "__all__"
+
 
 class ShoppingSerializer(serializers.ModelSerializer):
     item = FoodPostSerializer()
+
     class Meta:
         model = Shopping
-        fields = '__all__'
+        fields = "__all__"
+
 
 class AllShoppingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingPayment
-        fields = '__all__'
+        fields = "__all__"
