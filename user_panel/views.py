@@ -37,6 +37,7 @@ from .serializers import (
     AllShoppingSerializer,
     ShoppingSerializer,
     ShoppingDeliveryPersonSerializer,
+    ShoppingListSerializer
 )
 
 
@@ -410,7 +411,7 @@ class AllOrdersOfUser(APIView):
         shoppings = ShoppingPayment.objects.filter(shopping__user=user).distinct()
 
         shoppings = shoppings.annotate(
-            first_shopping_hotel_name=Subquery(
+            hotel_name=Subquery(
                 Shopping.objects.filter(payment_id=OuterRef("pk"))
                 .order_by("date")
                 .values("item__hotel__hotel_name")[:1]
@@ -420,11 +421,16 @@ class AllOrdersOfUser(APIView):
                 .order_by("date")
                 .values("item__hotel__profile_photo")[:1]
             ),
-        ).values()
+        )
 
-        # serializer = AllShoppingSerializer(shoppings,many=True)
+        serializer = ShoppingListSerializer(shoppings, many=True)
 
-        return Response(shoppings, status=status.HTTP_200_OK)
+        # Debug: Print the serialized data for the first instance
+        if serializer.data:
+            print("Serialized Data for the First Instance:", serializer.data[0])
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class OrderDetails(APIView):

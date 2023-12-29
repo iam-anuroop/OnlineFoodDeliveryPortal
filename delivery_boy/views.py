@@ -15,10 +15,9 @@ from rest_framework.decorators import permission_classes
 
 
 permission_classes([IsAuthenticated])
-
-
 class DeliveryBoyCrud(APIView):
     def post(self, request):
+        print('llllllllllll')
         serializer = DeliveryPostSerializer(data=request.data)
         if serializer.is_valid():
             user = request.user
@@ -33,15 +32,15 @@ class DeliveryBoyCrud(APIView):
                 res = uploader.upload(profile_photo)
                 id_proof = request.data.get("id_proof")
                 res1 = uploader.upload(id_proof)
-                DeliveryPerson.objects.create(
-                    user=user,
-                    full_name=serializer.validated_data.get("full_name"),
-                    location=location,
-                    address=serializer.validated_data.get("address"),
-                    delivery_area=serializer.validated_data.get("delivery_area"),
-                    profile_photo=res["url"],
-                    id_proof=res1["url"],
-                )
+                # DeliveryPerson.objects.create(
+                #     user=user,
+                #     full_name=serializer.validated_data.get("full_name"),
+                #     location=location,
+                #     address=serializer.validated_data.get("address"),
+                #     delivery_area=serializer.validated_data.get("delivery_area"),
+                #     profile_photo=res["url"],
+                #     id_proof=res1["url"],
+                # )
                 return Response(
                     {"msg": "account created sucessfully"}, status=status.HTTP_200_OK
                 )

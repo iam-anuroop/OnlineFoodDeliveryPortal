@@ -63,3 +63,12 @@ class AllShoppingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingPayment
         fields = "__all__"
+
+class ShoppingListSerializer(serializers.ModelSerializer):
+    hotel_name = serializers.CharField()
+    hotel_image = serializers.FileField()
+
+    class Meta:
+        model = ShoppingPayment
+        fields = "__all__"
+
