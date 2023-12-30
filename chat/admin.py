@@ -5,7 +5,7 @@ from .models import Message
 
 
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ("id", "sender", "receiver", "content")
+    list_display = ("id", "sender", "receiver", "content","timestamp")
 
 
 admin.site.register(Message, MessageAdmin)
