@@ -78,6 +78,7 @@ MIDDLEWARE = [
 ASGI_APPLICATION = "hungry_hub.routing.application"  # routing.py will handle the ASGI
 # ASGI_APPLICATION = "hungry_hub.asgi.application"
 CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+# reddis cheyyanam 
 # channels
 
 

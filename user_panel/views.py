@@ -425,9 +425,6 @@ class AllOrdersOfUser(APIView):
 
         serializer = ShoppingListSerializer(shoppings, many=True)
 
-        # Debug: Print the serialized data for the first instance
-        if serializer.data:
-            print("Serialized Data for the First Instance:", serializer.data[0])
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
