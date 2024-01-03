@@ -21,7 +21,8 @@ import base64
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from cloudinary import uploader
-
+from .task import send_mail_to_users
+from celery import current_app
 
 # Registration and updating of hotel owner details
 
@@ -284,6 +285,7 @@ class FoodmenuView(APIView):
             res = uploader.upload(food_image)
             serializer = FoodPostSerializer(data=request.data)
             if serializer.is_valid():
+                print('sriiiiiiiiiii')
                 food_type = serializer.validated_data.get("food_type")
                 FoodMenu.objects.create(
                     hotel=hotel,
@@ -295,6 +297,9 @@ class FoodmenuView(APIView):
                     description=serializer.validated_data.get("description"),
                     is_veg=serializer.validated_data.get("is_veg"),
                 )
+                print('jjjjjjjjjjjj')
+                resipient_list = list(MyUser.objects.all().values_list('email',flat=True))
+                send_mail_to_users.delay(subject='heloo',message='hiii',recipient_list=resipient_list)
                 return Response({"msg": "food item added"}, status=status.HTTP_200_OK)
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

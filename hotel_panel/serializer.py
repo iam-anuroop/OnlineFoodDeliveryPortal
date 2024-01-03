@@ -34,7 +34,7 @@ class FoodPostSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "food_name",
-            "food_image",
+            # "food_image",
             "food_type",
             "food_price",
             "offer_price",

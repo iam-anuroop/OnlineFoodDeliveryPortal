@@ -12,4 +12,7 @@ class DeliveryPerson(models.Model):
     id_proof = models.TextField(null=True, blank=True)
 
 
+    is_approved = models.BooleanField(default=False)
+
+
 # Create your models here.

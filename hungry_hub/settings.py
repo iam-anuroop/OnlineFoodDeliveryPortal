@@ -81,6 +81,10 @@ CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
 # reddis cheyyanam 
 # channels
 
+# redis
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+# redis
 
 ROOT_URLCONF = "hungry_hub.urls"
 
