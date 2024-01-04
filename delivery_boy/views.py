@@ -15,9 +15,11 @@ from rest_framework.decorators import permission_classes
 
 
 permission_classes([IsAuthenticated])
+
+
 class DeliveryBoyCrud(APIView):
     def post(self, request):
-        print('llllllllllll')
+        print("llllllllllll")
         serializer = DeliveryPostSerializer(data=request.data)
         if serializer.is_valid():
             user = request.user
@@ -76,6 +78,9 @@ class DeliveryBoyCrud(APIView):
 
         serializer = DeliveryPostSerializer(delivery_person)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ListNewOrdersAroundTheDelivery(APIView):
 
 
 # Create your views here.

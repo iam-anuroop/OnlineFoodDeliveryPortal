@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Message
-from .serializers import MessageGetSerializer,MessagePostSerializer
+from .serializers import MessageGetSerializer, MessagePostSerializer
 from accounts.models import MyUser
 from user_panel.models import ShoppingPayment
 
@@ -17,7 +17,7 @@ class SendMessageView(APIView):
         message_data = request.data.get("message", {})
         text = message_data.get("text", "")
         sender = message_data.get("sender", "")
-        chat_id = message_data.get("chat_id","")
+        chat_id = message_data.get("chat_id", "")
 
         order_id = ShoppingPayment.objects.get(stripe_id=chat_id)
 
@@ -32,12 +32,10 @@ class SendMessageView(APIView):
             return Response({"msg": "message saved"}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-
 
     def get(self, request):
         try:
-            chat_id = request.GET.get('chat_id')
+            chat_id = request.GET.get("chat_id")
 
             order_id = ShoppingPayment.objects.get(stripe_id=chat_id)
 
@@ -45,12 +43,5 @@ class SendMessageView(APIView):
             serializer = MessageGetSerializer(messages, many=True)
 
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except :
-            return Response({'msg':'error occured'},status=status.HTTP_200_OK)
-
-
-
-
-    
-
-
+        except:
+            return Response({"msg": "error occured"}, status=status.HTTP_200_OK)

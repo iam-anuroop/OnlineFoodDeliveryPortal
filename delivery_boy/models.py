@@ -11,7 +11,6 @@ class DeliveryPerson(models.Model):
     profile_photo = models.TextField(null=True, blank=True)
     id_proof = models.TextField(null=True, blank=True)
 
-
     is_approved = models.BooleanField(default=False)
 
 

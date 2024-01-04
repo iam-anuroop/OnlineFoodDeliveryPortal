@@ -37,7 +37,7 @@ from .serializers import (
     AllShoppingSerializer,
     ShoppingSerializer,
     ShoppingDeliveryPersonSerializer,
-    ShoppingListSerializer
+    ShoppingListSerializer,
 )
 
 
@@ -314,7 +314,6 @@ class PaymentView(APIView):
                 cancel_url="http://localhost:5173" + "/canceled/?canceled=true",
             )
 
-
             location = request.GET.get("address")
             address = request.GET.get("address")
             profile = UserProfile.objects.get(user=request.user)
@@ -333,14 +332,14 @@ class PaymentView(APIView):
                 total_amount=cart_food_summery["total_price"],
                 del_location=location,
                 address=address,
-                hotel_loc = hotel_loc
+                hotel_loc=hotel_loc,
             )
 
             with transaction.atomic():
                 for item_id, count in zip(food_item_ids, food_item_counts):
                     food_item = FoodMenu.objects.get(id=item_id)
                     # total_amount = food_item.food_price * count
-                    print('1')
+                    print("1")
                     Shopping.objects.create(
                         user=request.user,
                         item=food_item,
@@ -425,11 +424,10 @@ class AllOrdersOfUser(APIView):
 
         serializer = ShoppingListSerializer(shoppings, many=True)
 
-
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
+@permission_classes([IsAuthenticated])
 class OrderDetails(APIView):
     def get(self, request):
         try:
@@ -452,6 +450,17 @@ class OrderDetails(APIView):
             )
         except Exception as e:
             return Response({"msg": e}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@permission_classes([IsAuthenticated])
+class OrderTrackingUpdation(APIView):
+    def post(self, request):
+        pay_id = request.GET.get("pay_id")
+        delivery_det = ShoppingDeliveryPerson.objects.get(shopping_payment__id=pay_id)
+
+        # complete ordder tracking updationsssssssss
+
+        return Response("done")
 
 
 # Create your views here.

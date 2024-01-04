@@ -23,7 +23,7 @@ class DeliveryPersonSerializer(serializers.ModelSerializer):
             "delivery_area",
             "profile_photo",
             "id_proof",
-            "is_approved"
+            "is_approved",
         ]
 
 

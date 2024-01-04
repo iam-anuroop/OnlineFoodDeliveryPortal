@@ -53,6 +53,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_gis",
     "drf_yasg",
+    "channels",
+    "django_celery_results",
+    "django_celery_beat",
     "accounts",
     "user_panel",
     "hotel_panel",
@@ -60,7 +63,6 @@ INSTALLED_APPS = [
     "pages",
     "delivery_boy",
     "chat",
-    "channels",
 ]
 
 MIDDLEWARE = [
@@ -75,16 +77,35 @@ MIDDLEWARE = [
 ]
 
 # channels
-ASGI_APPLICATION = "hungry_hub.routing.application"  # routing.py will handle the ASGI
+ASGI_APPLICATION = "hungry_hub.routing.application"  
 # ASGI_APPLICATION = "hungry_hub.asgi.application"
-CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
-# reddis cheyyanam 
+# CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 # channels
 
-# redis
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-# redis
+
+
+# redis,CELERY
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_SERIALIZER = "json"
+
+# store results
+CELERY_RESULT_BACKEND = "django-db"
+# redis,CELERY
+
+# celery beat settings
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
 
 ROOT_URLCONF = "hungry_hub.urls"
 
@@ -222,6 +243,7 @@ SIMPLE_JWT = {
 GEOGRAPHY_ENABLED = True
 
 # SMTP configuration
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = config("EMAIL_HOST")
 EMAIL_PORT = 587
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")

@@ -101,7 +101,6 @@ class HotelSearch(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
 @permission_classes([IsAdminUser, IsAuthenticated])
 class AdminPanelUsersList(APIView):
     @swagger_auto_schema(
@@ -128,39 +127,34 @@ class AdminPanelUsersList(APIView):
             )
 
 
-
-
 @permission_classes([IsAdminUser, IsAuthenticated])
 class AdminPanelDeliveryPersonManage(APIView):
-    def get(self,request):        
-        del_person = DeliveryPerson.objects.filter(is_approved = False)
-        serializer = DeliveryPersonSerializer(del_person,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-    
+    def get(self, request):
+        del_person = DeliveryPerson.objects.filter(is_approved=False)
+        serializer = DeliveryPersonSerializer(del_person, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self,request):
-        id = request.GET.get('del_id')
+    def post(self, request):
+        id = request.GET.get("del_id")
         del_person = DeliveryPerson.objects.get(id=id)
-        del_person.is_approved =True
+        del_person.is_approved = True
         del_person.save()
-        return Response({'msg':'Approved the delivery person'},status=status.HTTP_200_OK)
-
-
-    
-
+        return Response(
+            {"msg": "Approved the delivery person"}, status=status.HTTP_200_OK
+        )
 
 
 @permission_classes([IsAdminUser, IsAuthenticated])
 class AdminPanelDeliveryPersonGet(APIView):
-    def get(self,request):
-        id = request.GET.get('del_id')
+    def get(self, request):
+        id = request.GET.get("del_id")
         if id:
             del_person = DeliveryPerson.objects.get(id=id)
             serializer = DeliveryPersonSerializer(del_person)
         else:
-            del_person = DeliveryPerson.objects.filter(is_approved = True)
-            serializer = DeliveryPersonSerializer(del_person,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+            del_person = DeliveryPerson.objects.filter(is_approved=True)
+            serializer = DeliveryPersonSerializer(del_person, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # Create your views here.

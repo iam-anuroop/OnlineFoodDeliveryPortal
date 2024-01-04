@@ -10,8 +10,10 @@ class MessagePostSerializer(serializers.ModelSerializer):
         model = Message
         fields = ["content"]
 
+
 class MessageGetSerializer(serializers.ModelSerializer):
     sender = MyuserEmailSerializer()
+
     class Meta:
         model = Message
-        fields = ["content","timestamp","sender"]
+        fields = ["content", "timestamp", "sender"]
