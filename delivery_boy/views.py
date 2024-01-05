@@ -12,11 +12,12 @@ from django.contrib.gis.geos import Point
 from cloudinary import uploader
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+from user_panel.models import DeliveryNotification,ShoppingDeliveryPerson,Shopping
+from user_panel.serializers import DeliveryNotificationSerializer,ShoppingSerializer
+
 
 
 permission_classes([IsAuthenticated])
-
-
 class DeliveryBoyCrud(APIView):
     def post(self, request):
         print("llllllllllll")
@@ -80,7 +81,22 @@ class DeliveryBoyCrud(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ListNewOrdersAroundTheDelivery(APIView):
+permission_classes([IsAuthenticated])
+class ListNewOrdersNotifiactionOfDelivery(APIView):
+    def get(self,request):
+
+        notifications = DeliveryNotification.objects.filter(delivery_person__user_id=2)
+        not_serializer = DeliveryNotificationSerializer(notifications,many=True)
+        shop_objs = Shopping.objects.filter(
+            payment_id__in=notifications.values_list(
+                'shooping_payment_id',
+                flat=True
+                ))
+        shop_serializer = ShoppingSerializer(shop_objs,many=True)
+        return Response({ 
+            'notification':not_serializer.data,
+            'shopping':shop_serializer.data
+                         },status=status.HTTP_200_OK)
 
 
 # Create your views here.

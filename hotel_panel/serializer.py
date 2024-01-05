@@ -43,6 +43,22 @@ class FoodPostSerializer(serializers.ModelSerializer):
             "is_veg",
         ]
 
+class FoodGetSerializer(serializers.ModelSerializer):
+    hotel = HotelAccountSeriallizer()
+    class Meta:
+        model = FoodMenu
+        fields = [
+            "id",
+            "hotel",
+            "food_name",
+            "food_image",
+            "food_type",
+            "food_price",
+            "offer_price",
+            "description",
+            "is_available",
+            "is_veg",
+        ]
 
 class FoodmenuSerializer(serializers.ModelSerializer):
     hotel = HotelAccountSeriallizer()

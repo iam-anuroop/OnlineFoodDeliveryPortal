@@ -15,11 +15,23 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from django.db.models.functions import Coalesce
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
 from user_panel.serializers import UserProfileSerializer
-from accounts.models import MyUser, UserProfile, SavedLocations
-from .models import Shopping, ShoppingDeliveryPerson, ShoppingPayment
-from hotel_panel.serializer import FoodmenuSerializer, HotelAccountSeriallizer
+from rest_framework.decorators import permission_classes
+from django.contrib.gis.db.models.functions import Distance
+from accounts.models import (
+    MyUser, 
+    UserProfile, 
+    SavedLocations
+    )
+from .models import (
+    Shopping,
+    ShoppingDeliveryPerson,
+    ShoppingPayment
+    )
+from hotel_panel.serializer import (
+    FoodmenuSerializer, 
+    HotelAccountSeriallizer,
+    )
 from django.db.models import (
     Q,
     F,
@@ -454,13 +466,38 @@ class OrderDetails(APIView):
 
 @permission_classes([IsAuthenticated])
 class OrderTrackingUpdation(APIView):
-    def post(self, request):
+    def get(self, request):
         pay_id = request.GET.get("pay_id")
         delivery_det = ShoppingDeliveryPerson.objects.get(shopping_payment__id=pay_id)
+        shopping = Shopping.objects.filter(payment_id=pay_id).first()
+        hotel_location = shopping.item.hotel.location
+        total_dist = ShoppingPayment.objects.filter(id=pay_id).annotate(
+                distance_to_delivery_person=Distance('del_location', hotel_location)
+            ).values('distance_to_delivery_person').first()
 
-        # complete ordder tracking updationsssssssss
+        delivery_person_location = UserProfile.objects.filter(user=delivery_det.delivery_person.user).values('location').first()
+        if delivery_person_location:
+            delivery_person_point = delivery_person_location['location']
 
-        return Response("done")
+            current_dist = ShoppingPayment.objects.filter(id=pay_id).annotate(
+                distance_total=Distance('del_location', delivery_person_point)
+            ).values('distance_total').first()
+            
+            distance_percentage = current_dist['distance_total']/total_dist['distance_to_delivery_person']*100
+            distance_percentage=80
+            if distance_percentage<100:
+                delivery_det.status='ordered'
+            if distance_percentage<100 and distance_percentage>70:
+                delivery_det.status='purchasing'
+            if distance_percentage<70 :
+                delivery_det.status='on_the_way'
+            delivery_det.save()
+
+            serializer = ShoppingDeliveryPersonSerializer(delivery_det)
+            
+            return Response(serializer.data)
+        else:
+            return Response({"error": "Delivery person location not found"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Create your views here.

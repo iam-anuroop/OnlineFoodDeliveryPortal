@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import DeliveryBoyCrud
+from .views import DeliveryBoyCrud,ListNewOrdersNotifiactionOfDelivery
 
 
 urlpatterns = [
     path("deliverypartner/", DeliveryBoyCrud.as_view(), name="deliverypartner"),
+    path("ordernotification/", ListNewOrdersNotifiactionOfDelivery.as_view(), name="ordernotification"),
 ]

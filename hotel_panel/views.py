@@ -7,6 +7,7 @@ from .serializer import (
     HotelAccountSeriallizer,
     FoodmenuSerializer,
     FoodPostSerializer,
+    FoodGetSerializer
 )
 from accounts.views import get_tokens_for_user
 from accounts.utils import send_email, send_phone, verify_user_code
@@ -357,7 +358,7 @@ class FoodmenuView(APIView):
             )
         else:
             foods = FoodMenu.objects.filter(hotel=hotel)
-        serializer = FoodPostSerializer(foods, many=True)
+        serializer = FoodGetSerializer(foods, many=True)
         return Response(
             {"foods": serializer.data, "query": query}, status=status.HTTP_200_OK
         )

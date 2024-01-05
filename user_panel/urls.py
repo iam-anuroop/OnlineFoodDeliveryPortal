@@ -8,6 +8,7 @@ from .views import (
     AddressManage,
     AllOrdersOfUser,
     OrderDetails,
+    OrderTrackingUpdation,
 )
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
     path("success/", PaymentSuccessView.as_view(), name="success"),
     path("allorders/", AllOrdersOfUser.as_view(), name="allorders"),
     path("orderdetails/", OrderDetails.as_view(), name="orderdetails"),
+    path("ordertrack/", OrderTrackingUpdation.as_view(), name="ordertrack"),
 ]
