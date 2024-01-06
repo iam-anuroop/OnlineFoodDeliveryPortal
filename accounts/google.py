@@ -10,5 +10,5 @@ class Google:
             if "accounts.google.com" in idinfo["iss"]:
                 return idinfo
 
-        except:
+        except Exception as e:
             return "The token is either invalid or has expired"

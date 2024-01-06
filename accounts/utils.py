@@ -41,29 +41,3 @@ def send_email(user=None, email=None, message=None, otp=None, subject=None):
     to_email = email
     send_mail = EmailMessage(mail_subject, message, to=[to_email])
     send_mail.send()
-
-
-#     # Download the helper library from https://www.twilio.com/docs/python/install
-# import os
-# from twilio.rest import Client
-
-# # Set environment variables for your credentials
-# # Read more at http://twil.io/secure
-# account_sid = "ACbdcbb885e863d4751c3e54d71cc2f0e1"
-# auth_token = "4fafc14684661a9144a60af626f89e6d"
-# verify_sid = "VAe297e90e4e232b83d4ddeeb303d6c96c"
-# verified_number = "+917034256543"
-
-# client = Client(account_sid, auth_token)
-
-# verification = client.verify.v2.services(verify_sid) \
-#   .verifications \
-#   .create(to=verified_number, channel="sms")
-# print(verification.status)
-
-# otp_code = input("Please enter the OTP:")
-
-# verification_check = client.verify.v2.services(verify_sid) \
-#   .verification_checks \
-#   .create(to=verified_number, code=otp_code)
-# print(verification_check.status)

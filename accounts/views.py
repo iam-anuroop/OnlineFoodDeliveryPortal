@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from .serializers import (
     MyuserPhoneSerializer,
@@ -18,8 +17,6 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 import base64
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-import threading
 
 
 def get_tokens_for_user(user, **kwargs):
@@ -48,10 +45,6 @@ class GoogleAuth(GenericAPIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-# def send_email_thread(email, message, subject):
-#     send_email(subject, message, 'sender@example.com', [email], fail_silently=False)
-
-
 class RegisterWithEmail(APIView):
     @swagger_auto_schema(
         tags=["Authentication"],
@@ -67,8 +60,6 @@ class RegisterWithEmail(APIView):
             subject = "OTP for login."
             message = f"മോനെ ഇതാണ് നിന്റെ otp = {otp}"
             send_email(email=email, message=message, subject=subject)
-            # email_thread = threading.Thread(target=send_email_thread, args=(email, message, subject))
-            # email_thread.start()
             otp = str(otp)
             encoded_key = base64.b64encode(otp.encode("utf-8")).decode("utf-8")
             return Response(

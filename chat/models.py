@@ -1,8 +1,6 @@
-# models.py
-
 from django.db import models
 from accounts.models import MyUser
-from user_panel.models import Shopping, ShoppingPayment
+from user_panel.models import ShoppingPayment
 
 
 class Message(models.Model):

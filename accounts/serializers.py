@@ -1,8 +1,6 @@
 from rest_framework import serializers
-from rest_framework.fields import empty
-from .models import MyUser, SavedLocations
+from .models import SavedLocations
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
 from decouple import config
 from rest_framework.exceptions import AuthenticationFailed
 from .register import register_social_user
@@ -30,7 +28,7 @@ class GoogleAuthSerializer(serializers.Serializer):
         user_data = Google.validate(auth_token)
         try:
             user_data["sub"]
-        except:
+        except Exception as e:
             raise serializers.ValidationError(
                 "The token is invalid or expired. Please login again..."
             )

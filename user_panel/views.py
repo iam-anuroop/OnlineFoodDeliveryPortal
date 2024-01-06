@@ -2,40 +2,27 @@ import json
 import stripe
 import json, urllib
 from decouple import config
-from django.conf import settings
 from ipware import get_client_ip
 from django.db import transaction
 from rest_framework import status
-from django.shortcuts import redirect
 from hotel_panel.models import FoodMenu
 from rest_framework.views import APIView
 from django.contrib.gis.geos import Point
 from hotel_panel.models import HotelsAccount
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
-from django.db.models.functions import Coalesce
 from rest_framework.permissions import IsAuthenticated
 from user_panel.serializers import UserProfileSerializer
 from rest_framework.decorators import permission_classes
 from django.contrib.gis.db.models.functions import Distance
-from accounts.models import (
-    MyUser, 
-    UserProfile, 
-    SavedLocations
-    )
-from .models import (
-    Shopping,
-    ShoppingDeliveryPerson,
-    ShoppingPayment
-    )
+from accounts.models import MyUser, UserProfile, SavedLocations
+from .models import Shopping, ShoppingDeliveryPerson, ShoppingPayment
 from hotel_panel.serializer import (
-    FoodmenuSerializer, 
     HotelAccountSeriallizer,
-    )
+)
 from django.db.models import (
     Q,
     F,
-    Count,
     Sum,
     When,
     IntegerField,
@@ -128,11 +115,6 @@ class ProfileManage(APIView):
                     )
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            # UserProfile.objects.create(user=user)
-            # serializer = UserSerilaizer(user, data=request.data, partial=True)
-            # if serializer.is_valid():
-            #     serializer.save()
-            #     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
             return Response(
                 {"msg": "something wrong..."}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -471,33 +453,54 @@ class OrderTrackingUpdation(APIView):
         delivery_det = ShoppingDeliveryPerson.objects.get(shopping_payment__id=pay_id)
         shopping = Shopping.objects.filter(payment_id=pay_id).first()
         hotel_location = shopping.item.hotel.location
-        total_dist = ShoppingPayment.objects.filter(id=pay_id).annotate(
-                distance_to_delivery_person=Distance('del_location', hotel_location)
-            ).values('distance_to_delivery_person').first()
+        total_dist = (
+            ShoppingPayment.objects.filter(id=pay_id)
+            .annotate(
+                distance_to_delivery_person=Distance("del_location", hotel_location)
+            )
+            .values("distance_to_delivery_person")
+            .first()
+        )
 
-        delivery_person_location = UserProfile.objects.filter(user=delivery_det.delivery_person.user).values('location').first()
+        delivery_person_location = (
+            UserProfile.objects.filter(user=delivery_det.delivery_person.user)
+            .values("location")
+            .first()
+        )
         if delivery_person_location:
-            delivery_person_point = delivery_person_location['location']
+            delivery_person_point = delivery_person_location["location"]
 
-            current_dist = ShoppingPayment.objects.filter(id=pay_id).annotate(
-                distance_total=Distance('del_location', delivery_person_point)
-            ).values('distance_total').first()
-            
-            distance_percentage = current_dist['distance_total']/total_dist['distance_to_delivery_person']*100
-            distance_percentage=80
-            if distance_percentage<100:
-                delivery_det.status='ordered'
-            if distance_percentage<100 and distance_percentage>70:
-                delivery_det.status='purchasing'
-            if distance_percentage<70 :
-                delivery_det.status='on_the_way'
+            current_dist = (
+                ShoppingPayment.objects.filter(id=pay_id)
+                .annotate(
+                    distance_total=Distance("del_location", delivery_person_point)
+                )
+                .values("distance_total")
+                .first()
+            )
+
+            distance_percentage = (
+                current_dist["distance_total"]
+                / total_dist["distance_to_delivery_person"]
+                * 100
+            )
+            distance_percentage = 80
+            if distance_percentage < 100:
+                delivery_det.status = "ordered"
+            if distance_percentage < 100 and distance_percentage > 70:
+                delivery_det.status = "purchasing"
+            if distance_percentage < 70:
+                delivery_det.status = "on_the_way"
             delivery_det.save()
 
             serializer = ShoppingDeliveryPersonSerializer(delivery_det)
-            
+
             return Response(serializer.data)
         else:
-            return Response({"error": "Delivery person location not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Delivery person location not found"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 # Create your views here.

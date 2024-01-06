@@ -1,5 +1,3 @@
-# chat/routing.py
-
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.urls import re_path
 from .consumers import TextRoomConsumer

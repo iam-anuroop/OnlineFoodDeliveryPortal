@@ -1,13 +1,12 @@
-from django.shortcuts import render
-from hotel_panel.models import HotelOwner, HotelsAccount, FoodMenu
+from hotel_panel.models import HotelsAccount, FoodMenu
 from hotel_panel.serializer import HotelAccountSeriallizer, FoodmenuSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Count, Q
-from drf_yasg.utils import swagger_auto_schema
+
+# from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
 from django.contrib.gis.geos import Point
-from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
 from accounts.models import SavedLocations
 from accounts.serializers import SavedLocationSerializer

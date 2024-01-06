@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import ShoppingPayment, DeliveryNotification, Shopping
+from .models import ShoppingPayment, DeliveryNotification
 from delivery_boy.models import DeliveryPerson
 
 # from django.contrib.gis.db.models import Point, Distance

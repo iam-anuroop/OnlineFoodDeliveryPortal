@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.decorators import permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -7,7 +6,7 @@ from .serializer import (
     HotelAccountSeriallizer,
     FoodmenuSerializer,
     FoodPostSerializer,
-    FoodGetSerializer
+    FoodGetSerializer,
 )
 from accounts.views import get_tokens_for_user
 from accounts.utils import send_email, send_phone, verify_user_code
@@ -23,7 +22,6 @@ from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from cloudinary import uploader
 from .task import send_mail_to_users
-from celery import current_app
 
 
 # Registration and updating of hotel owner details
@@ -58,16 +56,6 @@ class OwnerAccountView(APIView):
             send_email(email=email, subject=subject, message=message)
             return Response({"msg": "Account created..."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    # def patch(self,request):
-    #     serializer = OwnerSerializer(HotelOwner,data=request.data,partial=True)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data,status=status.HTTP_200_OK)
-    #     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
-
-# Registration and update profile for hotel account and sending otp for verifying phone number
 
 
 @permission_classes([IsAuthenticated])
@@ -148,7 +136,6 @@ class VerifyHotelPhone(APIView):
     def post(self, request):
         serializer = OtpSerializer(data=request.data)
         hashed_otp = request.data.get("vid")  # TODO
-        phone = request.data.get("phone")
         if serializer.is_valid():
             otp = serializer.validated_data.get("otp")
             try:
@@ -301,8 +288,8 @@ class FoodmenuView(APIView):
                 recipient_list = list(
                     MyUser.objects.all().values_list("email", flat=True)
                 )
-                subject = "hiii"
-                message = "helooo"
+                subject = "Something Newwwww in your fav hotel"
+                message = "Food Food Food"
                 send_mail_to_users.delay(subject, message, recipient_list)
                 return Response({"msg": "food item added"}, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -349,7 +336,6 @@ class FoodmenuView(APIView):
         print(request.auth)
         hotel = HotelsAccount.objects.get(email=hotel_email)
         query = request.GET.get("q")
-        print(query, "pppppppp")
         if query:
             foods = FoodMenu.objects.filter(
                 Q(hotel=hotel) & Q(food_name__icontains=query)
@@ -364,7 +350,6 @@ class FoodmenuView(APIView):
         )
 
 
-# profile view for hotel to see their details
 @authentication_classes([AuthenticateHotel])
 @permission_classes([IsAuthenticated])
 class HotelProfileView(APIView):

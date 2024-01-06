@@ -1,9 +1,15 @@
 from rest_framework import serializers
 from accounts.models import MyUser, UserProfile
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
-from .models import Shopping, ShoppingPayment, ShoppingDeliveryPerson,DeliveryNotification
-from hotel_panel.serializer import FoodPostSerializer,HotelAccountSeriallizer,FoodGetSerializer
-from hotel_panel.models import FoodMenu
+from .models import (
+    Shopping,
+    ShoppingPayment,
+    ShoppingDeliveryPerson,
+    DeliveryNotification,
+)
+from hotel_panel.serializer import (
+    FoodGetSerializer,
+)
 
 
 class UserProfileSerializer(GeoFeatureModelSerializer):
@@ -52,9 +58,6 @@ class ShoppingDeliveryPersonSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-
-
-
 class ShoppingSerializer(serializers.ModelSerializer):
     item = FoodGetSerializer()
 
@@ -78,9 +81,9 @@ class ShoppingListSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-
 class DeliveryNotificationSerializer(serializers.ModelSerializer):
     shooping_payment = AllShoppingSerializer()
+
     class Meta:
         model = DeliveryNotification
         fields = "__all__"

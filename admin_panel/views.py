@@ -1,11 +1,10 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.decorators import permission_classes
 from hotel_panel.models import HotelsAccount
-from accounts.models import UserProfile, MyUser
+from accounts.models import MyUser
 from user_panel.serializers import UserSerilaizer
 from hotel_panel.serializer import HotelAccountSeriallizer
 from django.db.models import Q

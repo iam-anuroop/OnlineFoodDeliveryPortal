@@ -77,7 +77,7 @@ MIDDLEWARE = [
 ]
 
 # channels
-ASGI_APPLICATION = "hungry_hub.routing.application"  
+ASGI_APPLICATION = "hungry_hub.routing.application"
 # ASGI_APPLICATION = "hungry_hub.asgi.application"
 # CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 CHANNEL_LAYERS = {
@@ -89,7 +89,6 @@ CHANNEL_LAYERS = {
     },
 }
 # channels
-
 
 
 # redis,CELERY

@@ -1,9 +1,9 @@
 # task.py
 
 from celery import shared_task
-from django.core.mail import send_mail, EmailMessage
-from decouple import config
-import asyncio
+from django.core.mail import EmailMessage
+
+# import asyncio
 
 
 @shared_task(bind=True)
