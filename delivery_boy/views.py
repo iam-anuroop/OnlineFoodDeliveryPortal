@@ -93,4 +93,10 @@ class ListNewOrdersNotifiactionOfDelivery(APIView):
         )
 
 
+
+class AcceptRejectOrders(APIView):
+    def post(self,request):
+        
+
+        return Response({'hi':'hi'})
 # Create your views here.

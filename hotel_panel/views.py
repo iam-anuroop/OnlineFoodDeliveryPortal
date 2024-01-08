@@ -361,7 +361,6 @@ class HotelProfileView(APIView):
                 {"msg": "Something wrong while getting this hotel"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
         serializer = HotelAccountSeriallizer(hotel)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
