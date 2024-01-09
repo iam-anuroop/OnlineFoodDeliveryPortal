@@ -81,7 +81,7 @@ class DeliveryBoyCrud(APIView):
 @permission_classes([IsAuthenticated])
 class ListNewOrdersNotifiactionOfDelivery(APIView):
     def get(self, request):
-        notifications = DeliveryNotification.objects.filter(delivery_person__user_id=2)
+        notifications = DeliveryNotification.objects.filter(delivery_person__user_id=2,status=None)
         not_serializer = DeliveryNotificationSerializer(notifications, many=True)
         shop_objs = Shopping.objects.filter(
             payment_id__in=notifications.values_list("shooping_payment_id", flat=True)
@@ -93,10 +93,27 @@ class ListNewOrdersNotifiactionOfDelivery(APIView):
         )
 
 
-
+@permission_classes([IsAuthenticated])
 class AcceptRejectOrders(APIView):
     def post(self,request):
-        
+        action = request.data.get('data')
+        del_id = request.data.get('del_id')
+        notification = DeliveryNotification.objects.get(id=del_id)
+        if action == True: 
+            notification.status='accepted'
+        else :
+            notification.status='rejected'
+        notification.save()
 
+        return Response({'msg':'accpted the delivery'},status=status.HTTP_200_OK)
+
+
+
+class CurrentOrders(APIView):
+    def get(self,request):
         return Response({'hi':'hi'})
+
+
+
+
 # Create your views here.

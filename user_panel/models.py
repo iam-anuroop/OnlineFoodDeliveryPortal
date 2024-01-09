@@ -35,7 +35,7 @@ class DeliveryNotification(models.Model):
         ("accepted", "Accepted"),
         ("rejected", "Rejected"),
     ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES,null=True,blank=True)
     shooping_payment = models.ForeignKey(
         ShoppingPayment, on_delete=models.PROTECT, null=True, blank=True
     )
