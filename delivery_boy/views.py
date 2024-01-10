@@ -13,6 +13,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from user_panel.models import DeliveryNotification, Shopping
 from user_panel.serializers import DeliveryNotificationSerializer, ShoppingSerializer
+from hotel_panel.models import HotelsAccount
+from hotel_panel.serializer import HotelAccountSeriallizer
 
 
 @permission_classes([IsAuthenticated])
@@ -81,7 +83,7 @@ class DeliveryBoyCrud(APIView):
 @permission_classes([IsAuthenticated])
 class ListNewOrdersNotifiactionOfDelivery(APIView):
     def get(self, request):
-        notifications = DeliveryNotification.objects.filter(delivery_person__user_id=2,status=None)
+        notifications = DeliveryNotification.objects.filter(delivery_person__user=request.user,status=None)
         not_serializer = DeliveryNotificationSerializer(notifications, many=True)
         shop_objs = Shopping.objects.filter(
             payment_id__in=notifications.values_list("shooping_payment_id", flat=True)
@@ -109,9 +111,19 @@ class AcceptRejectOrders(APIView):
 
 
 
+@permission_classes([IsAuthenticated])
 class CurrentOrders(APIView):
     def get(self,request):
-        return Response({'hi':'hi'})
+        orders = DeliveryNotification.objects.filter(delivery_person__user=request.user,status='accepted')
+        serializer = DeliveryNotificationSerializer(orders,many=True)
+        payment_id = orders.values_list()
+        print(payment_id)
+        # Shopping.objects.filter(payment_id==payment_id)
+        # print
+        # hot_det = HotelsAccount.objects.filter(id__in=Shopping.objects.filter(
+        #         payment_id = payment_id).values_list('id',flat=True).first())
+        # print(hot_det)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 
 
