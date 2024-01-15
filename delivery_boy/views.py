@@ -118,7 +118,7 @@ class CurrentOrders(APIView):
         serializer = DeliveryNotificationSerializer(orders,many=True)
         payment_id = orders.values_list()
         print(payment_id)
-        # Shopping.objects.filter(payment_id==payment_id)
+        Shopping.objects.filter(payment_id==payment_id)
         # print
         # hot_det = HotelsAccount.objects.filter(id__in=Shopping.objects.filter(
         #         payment_id = payment_id).values_list('id',flat=True).first())

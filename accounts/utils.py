@@ -41,3 +41,4 @@ def send_email(user=None, email=None, message=None, otp=None, subject=None):
     to_email = email
     send_mail = EmailMessage(mail_subject, message, to=[to_email])
     send_mail.send()
+    return 'done'
