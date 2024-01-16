@@ -116,13 +116,6 @@ class CurrentOrders(APIView):
     def get(self,request):
         orders = DeliveryNotification.objects.filter(delivery_person__user=request.user,status='accepted')
         serializer = DeliveryNotificationSerializer(orders,many=True)
-        payment_id = orders.values_list()
-        print(payment_id)
-        Shopping.objects.filter(payment_id==payment_id)
-        # print
-        # hot_det = HotelsAccount.objects.filter(id__in=Shopping.objects.filter(
-        #         payment_id = payment_id).values_list('id',flat=True).first())
-        # print(hot_det)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 
