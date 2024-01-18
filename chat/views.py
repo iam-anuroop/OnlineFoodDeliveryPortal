@@ -8,6 +8,9 @@ from .models import Message
 from .serializers import MessageGetSerializer, MessagePostSerializer
 from accounts.models import MyUser
 from user_panel.models import ShoppingPayment
+import openai
+import time
+from decouple import config
 
 
 class SendMessageView(APIView):
@@ -45,3 +48,35 @@ class SendMessageView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except:
             return Response({"msg": "error occured"}, status=status.HTTP_200_OK)
+
+
+
+
+# handle the request response of openai
+api_key_open = "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"
+openai.api_key = api_key_open
+def ask_openai(message):
+    try:
+        resp = openai.Completion.create(
+            model="gpt-3.5-turbo",
+            prompt=message,
+            max_tokens=150,
+            n=1,
+            stop=None,
+            temperature=0.7,
+        )
+        answer = resp.choices[0].text.strip()
+        return answer
+    except openai.error.OpenAIError as e:
+        return str(e)
+
+
+class ChatgptIntegration(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self,request):
+        message = request.data.get('message')
+        print(message,'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
+        replay = ask_openai(message)
+
+        return Response(replay)
