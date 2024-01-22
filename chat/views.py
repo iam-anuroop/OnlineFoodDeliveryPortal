@@ -11,6 +11,7 @@ from user_panel.models import ShoppingPayment
 import openai
 import time
 from decouple import config
+import google.generativeai as pml
 
 
 class SendMessageView(APIView):
@@ -51,32 +52,55 @@ class SendMessageView(APIView):
 
 
 
+# handle the request response of google bard
+# pml.configure(token=config('BARD_API_KEY'))
+pml.configure(api_key=config('BARD_API_KEY'))
+def ask_bard_ai(prompt):
+    response = pml.chat(messages=prompt)
+    return response
 
-# handle the request response of openai
-api_key_open = "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"
-openai.api_key = api_key_open
-def ask_openai(message):
-    try:
-        resp = openai.Completion.create(
-            model="gpt-3.5-turbo",
-            prompt=message,
-            max_tokens=150,
-            n=1,
-            stop=None,
-            temperature=0.7,
-        )
-        answer = resp.choices[0].text.strip()
-        return answer
-    except openai.error.OpenAIError as e:
-        return str(e)
-
-
-class ChatgptIntegration(APIView):
-    permission_classes = [IsAuthenticated]
+class BardIntegration(APIView):
+    permission_classes = [IsAuthenticated] 
 
     def post(self,request):
         message = request.data.get('message')
-        print(message,'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
-        replay = ask_openai(message)
+        resp = ask_bard_ai(prompt = message)
+        print(resp.messages[1])
+        return Response(resp.messages[1])
 
-        return Response(replay)
+
+
+
+
+
+
+# handle the request response of openai
+# api_key_open = config('OPEN_AI_APIKEY')
+# openai.api_key = api_key_open
+# def ask_openai(message):
+#     try:
+#         resp = openai.Completion.create(
+#             model="gpt-3.5-turbo",
+#             prompt=message,
+#             max_tokens=150,
+#             n=1,
+#             stop=None,
+#             temperature=0.7,
+#         )
+#         answer = resp.choices[0].text.strip()
+#         return answer
+#     except openai.error.OpenAIError as e:
+#         print(e)
+#         return str(e)
+
+
+# class ChatgptIntegration(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def post(self,request):
+#         message = request.data.get('message')
+#         print(message,'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
+#         replay = ask_openai(message)
+#         print(replay)
+
+#         return Response(replay)
