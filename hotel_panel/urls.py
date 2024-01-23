@@ -8,6 +8,7 @@ from .views import (
     FoodmenuView,
     HotelPhoneOtp,
     HotelProfileView,
+    ProgressDetails,
 )
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
     path("hotelphoneotp/", HotelPhoneOtp.as_view(), name="hotelphoneotp"),
     path("hotelprofile/", HotelProfileView.as_view(), name="hotelprofile"),
     path("food/", FoodmenuView.as_view(), name="food"),
+    path("track/", ProgressDetails.as_view(), name="track"),
 ]

@@ -59,9 +59,9 @@ class RegisterWithEmail(APIView):
             otp = random.randint(100000, 999999)
             subject = "OTP for login."
             message = f"മോനെ ഇതാണ് നിന്റെ otp = {otp}"
-            print('kkkkkkkkkkkkkkkkkkk')
+            print("kkkkkkkkkkkkkkkkkkk")
             send_email(email=email, message=message, subject=subject)
-            print('kkkkk')
+            print("kkkkk")
             otp = str(otp)
             encoded_key = base64.b64encode(otp.encode("utf-8")).decode("utf-8")
             return Response(

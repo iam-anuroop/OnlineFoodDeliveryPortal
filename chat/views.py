@@ -51,27 +51,23 @@ class SendMessageView(APIView):
             return Response({"msg": "error occured"}, status=status.HTTP_200_OK)
 
 
-
 # handle the request response of google bard
-# pml.configure(token=config('BARD_API_KEY'))
-pml.configure(api_key=config('BARD_API_KEY'))
+pml.configure(api_key=config("BARD_API_KEY"))
+
+
 def ask_bard_ai(prompt):
     response = pml.chat(messages=prompt)
     return response
 
-class BardIntegration(APIView):
-    permission_classes = [IsAuthenticated] 
 
-    def post(self,request):
-        message = request.data.get('message')
-        resp = ask_bard_ai(prompt = message)
+class BardIntegration(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        message = request.data.get("message")
+        resp = ask_bard_ai(prompt=message)
         print(resp.messages[1])
         return Response(resp.messages[1])
-
-
-
-
-
 
 
 # handle the request response of openai

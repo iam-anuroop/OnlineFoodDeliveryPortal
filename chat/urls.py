@@ -2,8 +2,8 @@ from django.urls import path
 from .views import (
     SendMessageView,
     # ChatgptIntegration,
-    BardIntegration
-    )
+    BardIntegration,
+)
 
 urlpatterns = [
     path("send-message/", SendMessageView.as_view(), name="send-message"),

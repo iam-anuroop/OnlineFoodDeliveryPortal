@@ -83,7 +83,9 @@ class DeliveryBoyCrud(APIView):
 @permission_classes([IsAuthenticated])
 class ListNewOrdersNotifiactionOfDelivery(APIView):
     def get(self, request):
-        notifications = DeliveryNotification.objects.filter(delivery_person__user=request.user,status=None)
+        notifications = DeliveryNotification.objects.filter(
+            delivery_person__user=request.user, status=None
+        )
         not_serializer = DeliveryNotificationSerializer(notifications, many=True)
         shop_objs = Shopping.objects.filter(
             payment_id__in=notifications.values_list("shooping_payment_id", flat=True)
@@ -97,28 +99,27 @@ class ListNewOrdersNotifiactionOfDelivery(APIView):
 
 @permission_classes([IsAuthenticated])
 class AcceptRejectOrders(APIView):
-    def post(self,request):
-        action = request.data.get('data')
-        del_id = request.data.get('del_id')
+    def post(self, request):
+        action = request.data.get("data")
+        del_id = request.data.get("del_id")
         notification = DeliveryNotification.objects.get(id=del_id)
-        if action == True: 
-            notification.status='accepted'
-        else :
-            notification.status='rejected'
+        if action == True:
+            notification.status = "accepted"
+        else:
+            notification.status = "rejected"
         notification.save()
 
-        return Response({'msg':'accpted the delivery'},status=status.HTTP_200_OK)
-
+        return Response({"msg": "accpted the delivery"}, status=status.HTTP_200_OK)
 
 
 @permission_classes([IsAuthenticated])
 class CurrentOrders(APIView):
-    def get(self,request):
-        orders = DeliveryNotification.objects.filter(delivery_person__user=request.user,status='accepted')
-        serializer = DeliveryNotificationSerializer(orders,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-
-
+    def get(self, request):
+        orders = DeliveryNotification.objects.filter(
+            delivery_person__user=request.user, status="accepted"
+        )
+        serializer = DeliveryNotificationSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # Create your views here.

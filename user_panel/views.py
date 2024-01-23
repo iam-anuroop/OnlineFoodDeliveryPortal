@@ -132,6 +132,11 @@ class ProfileManage(APIView):
 
 @permission_classes([IsAuthenticated])
 class AddToCart(APIView):
+    @swagger_auto_schema(
+        tags=["User Cart"],
+        operation_description="User Cart Managing",
+        responses={200: "Okay", 400: "errors"},
+    )
     def post(self, request):
         try:
             hotel = str(request.data.get("hotel"))
@@ -180,7 +185,11 @@ class AddToCart(APIView):
                 {"msg": "error while add to cart"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-    @permission_classes([IsAuthenticated])
+    @swagger_auto_schema(
+        tags=["User Cart"],
+        operation_description="Getting details for user cart page",
+        responses={200: "Okay", 400: "errors"},
+    )
     def get(self, request):
         try:
             profile = UserProfile.objects.get(user=request.user)
@@ -222,6 +231,7 @@ class AddToCart(APIView):
             )
 
 
+# stripe configuring
 stripe.api_key = config("STRIPE_CLIENT_SECRET")
 
 

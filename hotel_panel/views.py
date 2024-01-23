@@ -18,10 +18,13 @@ from accounts.serializers import OtpSerializer
 import random
 from .customauth import AuthenticateHotel
 import base64
-from django.db.models import Q
+from django.db.models import Q, Count
 from drf_yasg.utils import swagger_auto_schema
 from cloudinary import uploader
 from .task import send_mail_to_users
+from user_panel.models import Shopping
+import datetime
+from django.utils import timezone
 
 
 # Registration and updating of hotel owner details
@@ -363,6 +366,50 @@ class HotelProfileView(APIView):
             )
         serializer = HotelAccountSeriallizer(hotel)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@authentication_classes([AuthenticateHotel])
+@permission_classes([IsAuthenticated])
+class ProgressDetails(APIView):
+    def get(self, request):
+        hotel_email = request.auth
+        current_date = timezone.now()
+        previous_year_start = current_date - timezone.timedelta(
+            days=current_date.year + 1
+        )
+
+        previous_year_start = timezone.datetime(current_date.year - 1, 1, 1)
+
+        current_year_data = (
+            Shopping.objects
+            .filter(
+                item__hotel__email=hotel_email,
+                date__year=current_date.year,
+            )
+            .values("item__food_type")
+            .annotate(count=Count("id"))
+        )
+
+        previous_year_data = (
+            Shopping.objects
+            .filter(
+                item__hotel__email=hotel_email,
+                date__year=previous_year_start.year,
+            )
+            .values("item__food_type")
+            .annotate(count=Count("id"))
+        )
+
+        
+        current = {
+            item["item__food_type"]: item["count"] for item in current_year_data
+        }
+
+        previous = {
+            item["item__food_type"]: item["count"] for item in previous_year_data
+        }
+
+        return Response({'current':current,'previous':previous})
 
 
 # Create your views heere
